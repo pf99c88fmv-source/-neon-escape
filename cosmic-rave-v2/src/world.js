@@ -4,8 +4,9 @@ import {RenderPass} from 'three/addons/postprocessing/RenderPass.js';
 import {UnrealBloomPass} from 'three/addons/postprocessing/UnrealBloomPass.js';
 import {OutputPass} from 'three/addons/postprocessing/OutputPass.js';
 import {SPB,SPEED,depth,zones,zoneAt,isPickup} from './course.js';
-import {TunnelArchitecture} from './tunnel.js?v=premium-show-1';
-import {RaveShow} from './rave-show.js';
+import {TunnelArchitecture} from './tunnel.js?v=arcade-finish-1';
+import {RaveShow} from './rave-show.js?v=arcade-finish-1';
+import {TunnelAtmosphere} from './tunnel-atmosphere.js';
 import {createCosmicBackdrop} from './cosmic-sky.js';
 import {ShaderPass} from 'three/addons/postprocessing/ShaderPass.js';
 import {FXAAShader} from 'three/addons/shaders/FXAAShader.js';
@@ -63,7 +64,7 @@ export class World{
  this.pickupMint=new T.MeshBasicMaterial({color:0x59ffb6});
  this.pickupPink=new T.MeshBasicMaterial({color:0xff66ca});
  this.tunnel=new TunnelArchitecture(this.scene,{metal:this.metal,dark:this.dark,neon:this.neon,accent:this.accent});
- this.show=new RaveShow(this.scene);
+ this.show=new RaveShow(this.scene);this.atmosphere=new TunnelAtmosphere(this.scene);
  // Volumetric-looking nebula, layered starfield and detailed planets.
  this.backdrop=createCosmicBackdrop(this.scene);this.sky=this.backdrop.sky;
  this.portal=new T.Group();this.portal.position.set(0,3.2,-155);for(let i=0;i<4;i++){const r=mesh(new T.TorusGeometry(6+i*1.5,.2,8,64),i%2?this.neon:this.accent,0,0,-i*2);this.portal.add(r);}this.scene.add(this.portal);
@@ -73,7 +74,7 @@ export class World{
  this.composer.addPass(this.fxaa);
  this.composer.addPass(new OutputPass());this.quality('auto');this.resize();addEventListener('resize',()=>this.resize());
  }
- quality(q){this.preset=q;this.dpr=q==='low'?1:q==='ultra'?Math.min(devicePixelRatio,2):Math.min(devicePixelRatio,1.4);this.bloom.enabled=q!=='low';this.fxaa.enabled=q!=='low';this.show.setQuality(q);this.renderer.setPixelRatio(this.dpr);this.composer.setPixelRatio(this.dpr);this.resize();}
+ quality(q){this.preset=q;this.dpr=q==='low'?1:q==='ultra'?Math.min(devicePixelRatio,2):Math.min(devicePixelRatio,1.4);this.bloom.enabled=q!=='low';this.fxaa.enabled=q!=='low';this.show.setQuality(q);this.atmosphere.setQuality(q);this.renderer.setPixelRatio(this.dpr);this.composer.setPixelRatio(this.dpr);this.resize();}
  resize(){this.renderer.setSize(innerWidth,innerHeight);this.composer.setSize(innerWidth,innerHeight);this.camera.aspect=innerWidth/innerHeight;this.camera.updateProjectionMatrix();
  if(this.fxaa)this.fxaa.material.uniforms.resolution.value.set(
   1/(Math.max(1,innerWidth)*this.dpr),1/(Math.max(1,innerHeight)*this.dpr)
@@ -81,8 +82,8 @@ export class World{
 }
  reset(){for(const o of this.objects.values()){this.show.releasePickup(o);this.scene.remove(o);}this.objects.clear();for(const p of this.particles)this.scene.remove(p);this.particles=[];}
  burst(x,hit=false,kind='orb'){const sparkle=hit?this.red:kind==='dancer'?this.pickupPink:kind==='cash'?this.pickupMint:this.gold;for(let i=0;i<16;i++){const p=mesh(sparkGeometry,sparkle,x,1.3,0,.65,.65,.65);p.userData={life:1,v:new T.Vector3(Math.sin(i*2.4)*3,1+Math.cos(i)*2,Math.cos(i*2.4)*3)};this.scene.add(p);this.particles.push(p);}}
- update(beat,dt,run,active){const z=zoneAt(beat),zone=zones[z];this.neon.color.lerp(new T.Color(zone.color),dt);this.neon.emissive.lerp(new T.Color(zone.color),dt);this.accent.emissive.lerp(new T.Color(zone.accent),dt);const pulse=Math.exp(-(beat%1)*8);this.neon.emissiveIntensity=1.4+pulse*(this.reduced?.2:.7);this.rim.intensity=43+pulse*11;this.backdrop.update(beat,dt);this.portal.rotation.z=Math.sin(beat*.04)*.18;
- const travel=beat*SPB*SPEED;this.tunnel.update(travel,beat,this.reduced);this.show.update(beat,dt,travel);
+ update(beat,dt,run,active){const z=zoneAt(beat),zone=zones[z];this.neon.color.lerp(new T.Color(zone.color),dt);this.neon.emissive.lerp(new T.Color(zone.color),dt);this.accent.emissive.lerp(new T.Color(zone.accent),dt);const pulse=Math.exp(-(beat%1)*8);this.neon.emissiveIntensity=1.15+pulse*(this.reduced?.15:.5);this.rim.intensity=39+pulse*8;this.backdrop.update(beat,dt);this.portal.rotation.z=Math.sin(beat*.04)*.18;
+ const travel=beat*SPB*SPEED;this.tunnel.update(travel,beat,this.reduced);this.show.update(beat,dt,travel);this.atmosphere.update(beat,dt,travel,z);
  this.lasers.forEach((g,i)=>{g.rotation.z=Math.sin(beat*.22+i)*.55;g.rotation.x=Math.cos(beat*.14+i)*.2;});
  for(const e of run?.events||[]){const zz=depth(e.beat,beat);if(zz>8||e.passed){const o=this.objects.get(e.id);if(o){this.show.releasePickup(o);this.scene.remove(o);this.objects.delete(e.id);}continue;}if(zz<-100)continue;let o=this.objects.get(e.id);if(!o){o=new T.Group();const pickup=isPickup(e.kind);
  if(e.kind==='dancer'||e.kind==='bottle'||e.kind==='cash'){
@@ -97,7 +98,7 @@ export class World{
    o.rotation.y=Math.sin(beat*.19+e.id)*.30;
    o.position.y=Math.sin(beat*Math.PI*2)*.045;
   }else{
-   o.rotation.y=beat*1.14;
+   o.rotation.y=Math.sin(beat*.27+e.id)*.25;
    o.position.y=Math.sin(beat*2*Math.PI+e.id)*.038;
   }
  }
