@@ -60,6 +60,30 @@ for(let i=0;i<18;i++){
  const bar=mesh(new THREE.BoxGeometry(13.6,.045,.16),pulseFloor,0,-3.63,-i*11);
  runway.add(bar);floorBars.push(bar);
 }
+// v4.4: animated runway edge chevrons and holographic floor panels.
+// Groups travel in the same direction as the tunnel ribs.
+const runwayChevrons=[];
+const chevronCyan=new THREE.MeshBasicMaterial({color:0x20e9ff,transparent:true,opacity:.8,depthWrite:false});
+const chevronPink=new THREE.MeshBasicMaterial({color:0xff39ac,transparent:true,opacity:.82,depthWrite:false});
+for(let i=0;i<14;i++){
+ const g=new THREE.Group();
+ for(const side of [-1,1]){
+  const blade=mesh(new THREE.BoxGeometry(.12,.055,1.45),i%3===0?chevronPink:chevronCyan,side*6.45,-3.59,0,0,side*.32);
+  g.add(blade);
+  g.add(mesh(new THREE.BoxGeometry(.22,.045,.48),i%3===0?chevronPink:chevronCyan,side*5.95,-3.585,-.44,0,side*.32));
+ }
+ g.position.z=-i*13;runway.add(g);runwayChevrons.push(g);
+}
+const hologramTiles=[];
+const tileMaterial=new THREE.MeshBasicMaterial({color:0x1b86bd,transparent:true,opacity:.18,side:THREE.DoubleSide,depthWrite:false});
+for(let i=0;i<12;i++){
+ const g=new THREE.Group();
+ for(let lane=-2;lane<=2;lane++){
+  const tile=mesh(new THREE.PlaneGeometry(1.52,2.7),tileMaterial,lane*2.2,-3.605,0,-Math.PI/2);
+  g.add(tile);
+ }
+ g.position.z=-i*16;runway.add(g);hologramTiles.push(g);
+}
 const ceilingGlow=new THREE.PointLight(0xd33cff,17,22);ceilingGlow.position.set(0,7,-15);scene.add(ceilingGlow);
 // Premium club ceiling: structural beams, light bars and holographic dance-floor screens.
 const clubDecor=[];
@@ -186,6 +210,13 @@ for(const side of [-1,1]){
  ship.add(mesh(new THREE.BoxGeometry(.46,.27,.78),armor,side*1.17,.12,.72));
  ship.add(mesh(new THREE.BoxGeometry(.19,.56,.68),pink,side*1.3,.38,1.03));
  const exhaust=mesh(new THREE.ConeGeometry(.25,1.35,10),new THREE.MeshBasicMaterial({color:0x23eaff,transparent:true,opacity:.68,depthWrite:false}),side*1.2,-.27,2.37,Math.PI/2);ship.add(exhaust);
+}
+// Cockpit rim, armor plates and rear exhaust guard rails.
+const cockpitRim=new THREE.MeshBasicMaterial({color:0x9af8ff});
+ship.add(mesh(new THREE.TorusGeometry(.48,.036,6,22),cockpitRim,0,.34,-.48,Math.PI/2));
+for(const side of [-1,1]){
+ ship.add(mesh(new THREE.BoxGeometry(.38,.07,1.1),armor,side*1.47,-.02,.58,0,side*.11,0));
+ ship.add(mesh(new THREE.BoxGeometry(.055,.12,.95),edgeGlow,side*1.48,.045,.6,0,side*.11,0));
 }
 const shipGlow=new THREE.PointLight(0x00ccff,9,9);shipGlow.position.set(0,-.4,2);ship.add(shipGlow);
 const objects=[];let running=false,paused=false,score=0,health=3,combo=0,elapsed=0,last=0,beatIndex=0,spawnBeat=0,invulnerable=0,desiredX=0,desiredY=-2.1,muted=false,audio=null,master=null,nextNote=0,note=0;
@@ -390,7 +421,10 @@ window.addEventListener('keydown',e=>{if(e.key==='ArrowLeft')setLane(Math.round(
 play.addEventListener('click',()=>{if(contextLost){location.reload();return;}screen.style.display='';startGame();});mute.addEventListener('click',()=>{muted=!muted;mute.textContent=muted?'♪̸':'♫';track.muted=muted;if(trackAvailable)trackLabel(muted?'♪ ТРЕК БЕЗ ЗВУКА':'♫ VITTY ИГРАЕТ');if(master&&audio)master.gain.setTargetAtTime(muted||(trackAvailable&&!track.paused)?0:.55,audio.currentTime,.012);});
 function resize(){camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight);}window.addEventListener('resize',resize);
 document.addEventListener('visibilitychange',()=>{paused=document.hidden;last=0;if(audio){if(paused){track.pause();audio.suspend().catch(()=>{});}else if(running){if(trackAvailable)track.play().catch(()=>{});const activeRun=runId;audio.resume().then(()=>{if(!running||paused||activeRun!==runId)return;const currentStep=Math.max(0,Math.ceil((audio.currentTime-beatZero)/(beat/4)));note=currentStep;nextNote=beatZero+currentStep*(beat/4);}).catch(()=>{});}}});
-function animate(t){requestAnimationFrame(animate);const dt=last?Math.min((t-last)/1000,.04):0;last=t;const active=running&&!paused&&!contextLost;if(active&&dt>0){perfTime+=dt;perfFrames++;perfCooldown=Math.max(0,perfCooldown-dt);if(perfTime>=3){const fps=perfFrames/perfTime;lastKnownFps=Math.round(fps);if(running)statusEl.textContent=(Math.floor(Math.max(0,elapsed)/beat/16)%2===0?'DRIVE':'HYPERDRIVE')+' · 132 BPM · '+lastKnownFps+' FPS';if(perfCooldown===0&&fps<43&&renderScale>0.9){renderScale=Math.max(.9,renderScale-.2);renderer.setPixelRatio(renderScale);perfCooldown=6;}else if(perfCooldown===0&&fps>57&&renderScale<Math.min(devicePixelRatio,1.7)){renderScale=Math.min(Math.min(devicePixelRatio,1.7),renderScale+.1);renderer.setPixelRatio(renderScale);perfCooldown=8;}perfTime=0;perfFrames=0;}}if(active){elapsed+=dt;score+=dt*15;schedule();const speed=33+Math.min(35,elapsed*.45);const rhythmTime=trackAvailable&&!track.paused?track.currentTime:(audio&&beatZero>0&&audio.state==='running'?Math.max(0,audio.currentTime-beatZero):elapsed);while(nextSpawnTime<rhythmTime-1){nextSpawnTime+=beat*2;spawnBeat++;}let spawnedThisFrame=0;while(nextSpawnTime>=rhythmTime-1&&distanceBetween(rhythmTime,nextSpawnTime)<=110+collisionZ&&spawnedThisFrame<24){addObstacle(spawnBeat++,nextSpawnTime);nextSpawnTime+=beat*2;spawnedThisFrame++;}beatPulse=Math.max(0,1-(rhythmTime%beat)/beat);const visualBeat=Math.floor(rhythmTime/beat);if(visualBeat!==lastBeatVisual){lastBeatVisual=visualBeat;statusEl.textContent=(Math.floor(visualBeat/16)%2===0?'DRIVE':'HYPERDRIVE')+' · 132 BPM · '+lastKnownFps+' FPS';}const tunnelDistance=distanceAt(rhythmTime);for(let i=0;i<curtains.length;i++){const g=curtains[i];g.position.z=12-(((i*20-tunnelDistance)%(curtains.length*20)+(curtains.length*20))%(curtains.length*20));g.rotation.z=Math.sin(rhythmTime*.7+i)*.025;}
+function animate(t){requestAnimationFrame(animate);const dt=last?Math.min((t-last)/1000,.04):0;last=t;const active=running&&!paused&&!contextLost;if(active&&dt>0){perfTime+=dt;perfFrames++;perfCooldown=Math.max(0,perfCooldown-dt);if(perfTime>=3){const fps=perfFrames/perfTime;lastKnownFps=Math.round(fps);if(running)statusEl.textContent=(Math.floor(Math.max(0,elapsed)/beat/16)%2===0?'DRIVE':'HYPERDRIVE')+' · 132 BPM · '+lastKnownFps+' FPS';if(perfCooldown===0&&fps<43&&renderScale>0.9){renderScale=Math.max(.9,renderScale-.2);renderer.setPixelRatio(renderScale);perfCooldown=6;}else if(perfCooldown===0&&fps>57&&renderScale<Math.min(devicePixelRatio,1.7)){renderScale=Math.min(Math.min(devicePixelRatio,1.7),renderScale+.1);renderer.setPixelRatio(renderScale);perfCooldown=8;}perfTime=0;perfFrames=0;}}if(active){elapsed+=dt;score+=dt*15;schedule();const speed=33+Math.min(35,elapsed*.45);const rhythmTime=trackAvailable&&!track.paused?track.currentTime:(audio&&beatZero>0&&audio.state==='running'?Math.max(0,audio.currentTime-beatZero):elapsed);while(nextSpawnTime<rhythmTime-1){nextSpawnTime+=beat*2;spawnBeat++;}let spawnedThisFrame=0;while(nextSpawnTime>=rhythmTime-1&&distanceBetween(rhythmTime,nextSpawnTime)<=110+collisionZ&&spawnedThisFrame<24){addObstacle(spawnBeat++,nextSpawnTime);nextSpawnTime+=beat*2;spawnedThisFrame++;}beatPulse=Math.max(0,1-(rhythmTime%beat)/beat);const visualBeat=Math.floor(rhythmTime/beat);if(visualBeat!==lastBeatVisual){lastBeatVisual=visualBeat;statusEl.textContent=(Math.floor(visualBeat/16)%2===0?'DRIVE':'HYPERDRIVE')+' · 132 BPM · '+lastKnownFps+' FPS';}const tunnelDistance=distanceAt(rhythmTime);for(let i=0;i<runwayChevrons.length;i++){runwayChevrons[i].position.z=12-(((i*13-tunnelDistance)%(runwayChevrons.length*13)+(runwayChevrons.length*13))%(runwayChevrons.length*13));}
+for(let i=0;i<hologramTiles.length;i++){hologramTiles[i].position.z=12-(((i*16-tunnelDistance)%(hologramTiles.length*16)+(hologramTiles.length*16))%(hologramTiles.length*16));}
+tileMaterial.opacity=.1+beatPulse*.13;
+for(let i=0;i<curtains.length;i++){const g=curtains[i];g.position.z=12-(((i*20-tunnelDistance)%(curtains.length*20)+(curtains.length*20))%(curtains.length*20));g.rotation.z=Math.sin(rhythmTime*.7+i)*.025;}
 for(let i=0;i<canopyPanels.length;i++){canopyPanels[i].position.z=12-(((i*14-tunnelDistance)%(canopyPanels.length*14)+(canopyPanels.length*14))%(canopyPanels.length*14));}
 curtainA.opacity=.1+beatPulse*.12;curtainB.opacity=.08+beatPulse*.13;
 for(let i=0;i<portalLayers.length;i++){portalLayers[i].rotation.z+=(i%2?-.12:.12)*dt;portalLayers[i].scale.setScalar(1+beatPulse*.025);}
