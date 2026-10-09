@@ -1,6 +1,6 @@
 import * as T from 'three';
 import {GLTFLoader} from 'three/addons/loaders/GLTFLoader.js';
-import {SPB,zones} from './course.js';
+import {SPB,zones} from './course.js?v=vitty-audio-2';
 import {groovePose,selectRunAnimation} from './raver-motion.js';
 import {styleRaverMaterial,findRigBone,attachClubHeadphones} from './raver-fashion.js';
 
