@@ -27,6 +27,7 @@ test('picking up a dancer, bottle or rolled dollar awards exact points once',()=
  for(const kind of kinds){
   const run=new Run();
   const e=run.events.find(e=>e.kind===kind);
+  for(const older of run.events)if(older.beat<e.beat)older.passed=true;
   run.x=e.x;run.target=e.x;run.beat=e.beat-.12;
   const scoreBefore=run.score;
   run.update(e.beat+.02,.02);
