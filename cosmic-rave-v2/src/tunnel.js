@@ -8,8 +8,8 @@ const archPoints=Array.from({length:27},(_,i)=>{
  const a=Math.PI-i*Math.PI/26;
  return new T.Vector3(Math.cos(a)*6.12,.40+Math.sin(a)*8.16,0);
 });
-const smoothVault=new T.TubeGeometry(new T.CatmullRomCurve3(archPoints),52,.12,6,false);
-const innerVault=new T.TubeGeometry(new T.CatmullRomCurve3(archPoints.map(p=>new T.Vector3(p.x*.955,p.y*.955,0))),52,.048,6,false);
+const smoothVault=new T.TubeGeometry(new T.CatmullRomCurve3(archPoints),88,.12,10,false);
+const innerVault=new T.TubeGeometry(new T.CatmullRomCurve3(archPoints.map(p=>new T.Vector3(p.x*.955,p.y*.955,0))),84,.048,8,false);
 export class TunnelArchitecture{
  constructor(scene,m){
   this.materials={
@@ -20,7 +20,15 @@ export class TunnelArchitecture{
    glass:new T.MeshBasicMaterial({color:0x2389b9,transparent:true,opacity:.18,depthWrite:false,side:T.DoubleSide,blending:T.AdditiveBlending}),
    lane:new T.MeshBasicMaterial({color:0x2f9ec3,transparent:true,opacity:.54,depthWrite:false}),
    platinum:new T.MeshStandardMaterial({color:0x657b91,metalness:.9,roughness:.2}),
-   ice:new T.MeshBasicMaterial({color:0x8de9ff,transparent:true,opacity:.63,depthWrite:false}),
+   ice:new T.MeshBasicMaterial({color:0x8de9ff,transparent:true,opacity:.52,depthWrite:false}),
+   halo:new T.MeshBasicMaterial({
+    color:0x52d8ff,transparent:true,opacity:.105,
+    depthWrite:false,blending:T.AdditiveBlending,side:T.DoubleSide
+   }),
+   magentaHalo:new T.MeshBasicMaterial({
+    color:0xea7bfa,transparent:true,opacity:.094,
+    depthWrite:false,blending:T.AdditiveBlending,side:T.DoubleSide
+   }),
    floor:new T.ShaderMaterial({
     uniforms:{uTime:{value:0},uPulse:{value:0},uTint:{value:new T.Color(0x218dba)}},
     transparent:true,depthWrite:false,side:T.DoubleSide,blending:T.AdditiveBlending,
@@ -105,6 +113,9 @@ export class TunnelArchitecture{
   // Broad silver roof curves and inlaid luminous arcs soften the previously
   // boxy corridor. Low-radius tubes stay overhead and outside the safe lanes.
   if(type!==3)this.add(i,'vault',type===0?'platinum':'brushed',[0,0,-.46],[1,1,1]);
+  // A low-opacity broad halo behind the emissive rim softens hard edges.
+  if(type===0||type===2)
+   this.add(i,'vault',type===0?'magentaHalo':'halo',[0,.018,-.57],[1.035,1.030,1.3]);
   if(type===0||type===2)this.add(i,'inVault',type===0?'ultraviolet':'ice',[0,.06,.28],[1,1,1]);
   if(type===0)this.add(i,'vault','cyan',[0,0,-3.2],[.987,.989,1]);
   // An open, human-sized central passage inside a huge signature gate.
@@ -201,7 +212,9 @@ export class TunnelArchitecture{
   this.materials.holo.uniforms.uTime.value=beat*.45;
   this.materials.holo.uniforms.uPulse.value=reduced?pulse*.4:pulse;
   this.materials.glass.opacity=(reduced?.17:.22)+pulse*(reduced?.035:.1);
-  this.materials.lane.opacity=.37+pulse*(reduced?.07:.14);
+  this.materials.halo.opacity=.082+pulse*(reduced?.008:.023);
+  this.materials.magentaHalo.opacity=.068+pulse*(reduced?.010:.027);
+  this.materials.lane.opacity=.32+pulse*(reduced?.065:.11);
   this.materials.amber.emissiveIntensity=1.2+pulse*(reduced?.15:.4);
  }
 }
