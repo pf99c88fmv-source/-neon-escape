@@ -1,0 +1,39 @@
+{
+  "title": "МАКАР + ЖЕНЯ — Tunnel Pressure",
+  "bpm": 140,
+  "beats": 192,
+  "duration": 82.28571428571428,
+  "sha256": "095828ca170f2e27f3d4884c01ab283e63239cab02291de4f032eeea628c701f",
+  "sampleRate": 44100,
+  "originalSynthesis": true,
+  "sections": [
+    {
+      "beat": 0,
+      "name": "intro"
+    },
+    {
+      "beat": 16,
+      "name": "build"
+    },
+    {
+      "beat": 32,
+      "name": "drop"
+    },
+    {
+      "beat": 80,
+      "name": "break"
+    },
+    {
+      "beat": 96,
+      "name": "build"
+    },
+    {
+      "beat": 112,
+      "name": "second_drop"
+    },
+    {
+      "beat": 176,
+      "name": "finale"
+    }
+  ]
+}

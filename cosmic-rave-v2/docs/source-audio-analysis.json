@@ -1,0 +1,6 @@
+{
+  "duration_seconds": 329.1308843537415,
+  "estimated_bpm": 132.03,
+  "method": "low-frequency spectral flux, autocorrelation over 8 periods, 110-160 BPM grid .01",
+  "not_manual_beatmap": true
+}
