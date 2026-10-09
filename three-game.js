@@ -51,7 +51,7 @@ let activePointer=null,dragStartX=0,dragShipX=0;
 function pointerX(e){const r=renderer.domElement.getBoundingClientRect();return (e.clientX-r.left)/Math.max(1,r.width);}
 function laneTarget(u){return THREE.MathUtils.clamp((u-.5)*8.2,-4.1,4.1);}
 function steerDown(e){if(!running||paused||contextLost||e.target!==renderer.domElement)return;if(activePointer!==null)return;activePointer=e.pointerId;dragStartX=e.clientX;dragShipX=ship.position.x;desiredX=laneTarget(pointerX(e));dragShipX=desiredX;try{renderer.domElement.setPointerCapture(e.pointerId);}catch{}e.preventDefault();}
-function steerMove(e){if(!running||paused||activePointer!==e.pointerId)return;const width=Math.max(1,renderer.domElement.getBoundingClientRect().width);const delta=e.clientX-dragStartX;desiredX=THREE.MathUtils.clamp(dragShipX+delta/width*8.2,-4.1,4.1);e.preventDefault();}
+function steerMove(e){if(!running||paused||activePointer!==e.pointerId)return;const width=Math.max(1,renderer.domElement.getBoundingClientRect().width);const delta=e.clientX-dragStartX;const sensitivity=2.35;desiredX=THREE.MathUtils.clamp(dragShipX+delta/width*8.2*sensitivity,-4.1,4.1);e.preventDefault();}
 function steerEnd(e){if(activePointer===e.pointerId){activePointer=null;try{renderer.domElement.releasePointerCapture(e.pointerId);}catch{}}}
 renderer.domElement.addEventListener('pointerdown',steerDown,{passive:false});
 renderer.domElement.addEventListener('pointermove',steerMove,{passive:false});
