@@ -24,7 +24,7 @@ export class AudioEngine{
  sound(kind){
   if(!this.context||this.effects===0)return;
   const c=this.context,t=c.currentTime,o=c.createOscillator(),g=c.createGain();
-  const f=kind==='hit'?85:kind==='pulse'?160:kind==='shield'?600:kind==='perfect'?930:kind==='orb'?1100:420;
+  const f=({hit:85,pulse:160,shield:600,perfect:930,orb:1100,dancer:980,bottle:690,cash:820})[kind]??420;
   o.type=kind==='hit'?'sawtooth':'sine';o.frequency.setValueAtTime(f,t);o.frequency.exponentialRampToValueAtTime(kind==='pulse'?620:f*.45,t+.13);g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(kind==='hit'?.1:kind==='orb'?.012:.028,t+.003);g.gain.exponentialRampToValueAtTime(.0001,t+.18);o.connect(g);g.connect(this.fx);o.start(t);o.stop(t+.19);o.onended=()=>{o.disconnect();g.disconnect();};
  }
  transport(){if(['suspended','interrupted'].includes(this.context?.state))return this.wallBeat();return this.offset+Math.max(0,this.context.currentTime-this.startAt)/SPB;}
