@@ -233,6 +233,19 @@ function makeDancer(index){
   knee.add(mesh(new THREE.BoxGeometry(.34,.09,.53),neon,0,-.57,-.13));
   legs.push(leg);shins.push(knee);
  }
+ // Festival costume details, eyes and jewelry visible at pickup distance.
+ const lipstick=new THREE.MeshBasicMaterial({color:0xc42b6c});
+ const eyeWhite=new THREE.MeshBasicMaterial({color:0xf3ecdf});
+ for(const side of [-1,1]){
+  headPivot.add(mesh(new THREE.SphereGeometry(.055,8,6),eyeWhite,side*.105,.34,-.253));
+  headPivot.add(mesh(new THREE.SphereGeometry(.028,8,6),hairMat,side*.105,.34,-.304));
+  headPivot.add(mesh(new THREE.TorusGeometry(.1,.018,5,12),silver,side*.255,.12,-.06));
+  torso.add(mesh(new THREE.SphereGeometry(.085,8,6),silver,side*.29,.26,-.19));
+  hips.add(mesh(new THREE.BoxGeometry(.12,.1,.31),neon,side*.28,-.46,-.09));
+ }
+ headPivot.add(mesh(new THREE.BoxGeometry(.15,.027,.027),lipstick,0,.19,-.264));
+ torso.add(mesh(new THREE.TorusGeometry(.19,.025,5,14),silver,0,-.1,-.29));
+ torso.add(mesh(new THREE.BoxGeometry(.1,.36,.055),neon,0,-.12,-.33));
  const halo=mesh(new THREE.TorusGeometry(.95,.06,6,24),neon,0,-1.7,0,Math.PI/2);dancer.add(halo);
  dancer.scale.setScalar(1.8);
  dancer.userData={arms,forearms,legs,shins,headPivot,torso,hips,halo,style:variant};
@@ -240,32 +253,41 @@ function makeDancer(index){
 }
 function makeWhiskyBottle(){
  const g=new THREE.Group();
- const amber=new THREE.MeshPhysicalMaterial({color:0xb76416,metalness:.06,roughness:.17,transparent:true,opacity:.9,clearcoat:1,clearcoatRoughness:.08});
- const glassEdge=new THREE.MeshBasicMaterial({color:0xffc15d,transparent:true,opacity:.7});
- const cap=new THREE.MeshStandardMaterial({color:0x18121c,metalness:.55,roughness:.25});
- const label=new THREE.MeshBasicMaterial({map:bottleLabel});
- g.add(mesh(new THREE.BoxGeometry(.92,1.44,.54),amber,0,0,0));
- g.add(mesh(new THREE.BoxGeometry(.96,.07,.58),glassEdge,0,-.71,0));
- g.add(mesh(new THREE.CylinderGeometry(.25,.31,.4,12),amber,0,.9,0));
- g.add(mesh(new THREE.CylinderGeometry(.24,.24,.29,12),cap,0,1.24,0));
- g.add(mesh(new THREE.PlaneGeometry(.81,.73),label,0,.08,-.285,0,Math.PI,0));
- for(const x of [-.39,.39])g.add(mesh(new THREE.BoxGeometry(.055,1.29,.06),glassEdge,x,0,-.29));
- g.scale.setScalar(1.45);return g;
+ const amber=new THREE.MeshPhysicalMaterial({color:0xc67927,metalness:.04,roughness:.12,transparent:true,opacity:.86,clearcoat:1,clearcoatRoughness:.08,side:THREE.DoubleSide});
+ const whisky=new THREE.MeshStandardMaterial({color:0x7b300b,metalness:.05,roughness:.2,transparent:true,opacity:.82});
+ const rim=new THREE.MeshBasicMaterial({color:0xffd187,transparent:true,opacity:.85});
+ const cap=new THREE.MeshStandardMaterial({color:0x1b1420,metalness:.75,roughness:.2});
+ const label=new THREE.MeshBasicMaterial({map:bottleLabel,side:THREE.DoubleSide});
+ const body=mesh(new THREE.CylinderGeometry(.48,.54,1.45,8),amber,0,0,0,0,Math.PI/8);body.scale.z=.72;g.add(body);
+ const liquid=mesh(new THREE.CylinderGeometry(.43,.48,.92,8),whisky,0,-.23,0,0,Math.PI/8);liquid.scale.z=.67;g.add(liquid);
+ const shoulder=mesh(new THREE.CylinderGeometry(.22,.47,.39,8),amber,0,.9,0,0,Math.PI/8);shoulder.scale.z=.78;g.add(shoulder);
+ g.add(mesh(new THREE.CylinderGeometry(.21,.21,.31,16),amber,0,1.23,0));
+ g.add(mesh(new THREE.CylinderGeometry(.255,.255,.32,16),cap,0,1.46,0));
+ for(let k=0;k<5;k++)g.add(mesh(new THREE.TorusGeometry(.253,.016,4,18),rim,0,1.33+k*.045,0,Math.PI/2));
+ const front=mesh(new THREE.PlaneGeometry(.84,.81),label,0,.02,-.415);g.add(front);
+ g.add(mesh(new THREE.BoxGeometry(.9,.055,.045),rim,0,.45,-.42));
+ g.add(mesh(new THREE.BoxGeometry(.9,.055,.045),rim,0,-.4,-.42));
+ g.add(mesh(new THREE.BoxGeometry(.93,.065,.68),rim,0,-.72,0));
+ g.scale.setScalar(1.42);return g;
 }
 function makeDollarRoll(){
  const g=new THREE.Group();
- const paper=new THREE.MeshStandardMaterial({map:cashTexture,side:THREE.DoubleSide,roughness:.72});
- const rim=new THREE.MeshBasicMaterial({color:0xcce3af});
- const rubber=new THREE.MeshBasicMaterial({color:0xdab257});
- // The banknote cylinder is aligned horizontally; the texture wraps around it.
- const roll=mesh(new THREE.CylinderGeometry(.43,.43,1.65,28,1,true),paper,0,0,0,0,0,Math.PI/2);
- g.add(roll);
- for(const x of [-.82,.82]){
-  g.add(mesh(new THREE.TorusGeometry(.43,.065,8,28),rim,x,0,0,0,Math.PI/2));
-  g.add(mesh(new THREE.TorusGeometry(.26,.05,8,24),rim,x+(x>0?.015:-.015),0,0,0,Math.PI/2));
+ const paper=new THREE.MeshStandardMaterial({map:cashTexture,side:THREE.DoubleSide,roughness:.7});
+ const paperEdge=new THREE.MeshStandardMaterial({color:0xd4e6bb,roughness:.9});
+ const inner=new THREE.MeshBasicMaterial({color:0x173a28,side:THREE.DoubleSide});
+ const band=new THREE.MeshStandardMaterial({color:0xe0b56b,metalness:.35,roughness:.38});
+ // The central roll is a textured banknote wrapped around a hollow paper tube.
+ const cylinder=new THREE.Mesh(new THREE.CylinderGeometry(.48,.48,1.72,32,1,true),paper);
+ cylinder.rotation.z=Math.PI/2;g.add(cylinder);
+ for(const x of [-.86,.86]){
+  const edge=mesh(new THREE.TorusGeometry(.48,.036,7,32),paperEdge,x,0,0,0,Math.PI/2);g.add(edge);
+  g.add(mesh(new THREE.TorusGeometry(.29,.05,7,28),paperEdge,x+(x>0?.012:-.012),0,0,0,Math.PI/2));
+  const darkHole=mesh(new THREE.CircleGeometry(.24,24),inner,x+(x>0?.006:-.006),0,0,0,x>0?Math.PI/2:-Math.PI/2);g.add(darkHole);
  }
- for(const x of [-.21,.21])g.add(mesh(new THREE.TorusGeometry(.44,.055,8,24),rubber,x,0,0,0,Math.PI/2));
- g.rotation.z=-.27;g.rotation.y=.35;g.scale.setScalar(1.5);return g;
+ for(const x of [-.16,.16])g.add(mesh(new THREE.TorusGeometry(.49,.068,8,32),band,x,0,0,0,Math.PI/2));
+ // A short visible corner makes the object read as a rolled banknote, not a pipe.
+ const flap=mesh(new THREE.PlaneGeometry(.56,.8),paper,.15,.46,-.19,-.23,.25,-.2);g.add(flap);
+ g.rotation.set(.2,.35,-.25);g.scale.setScalar(1.42);return g;
 }
 function addObstacle(index,arrivalBeat){const patterns=[[0,2,-2,1,-1],[-2,0,2,-1,1],[2,1,0,-1,-2],[0,-2,2,-1,1]];const section=Math.floor(index/16)%patterns.length;const lane=patterns[section][index%5];const isGem=index%4===1;const group=new THREE.Group();let hitRadius=.9;let dancer=null;let collectibleType=null;if(isGem){const kind=Math.floor(index/4)%3;collectibleType=kind===0?'raver':kind===1?'whisky':'dollars';if(kind===0){dancer=makeDancer(index);group.add(dancer);hitRadius=1.55;}else if(kind===1){group.add(makeWhiskyBottle());hitRadius=1.2;}else{group.add(makeDollarRoll());hitRadius=1.2;}}else if(index%4===0){group.add(mesh(new THREE.TorusGeometry(1.08,.23,8,8),pink,0,0,0,0,0,Math.PI/8));group.add(mesh(new THREE.OctahedronGeometry(.65,0),violet));hitRadius=1.03;}else if(index%4===1){for(const x of [-.77,.77])group.add(mesh(new THREE.BoxGeometry(.24,2.65,.5),pink,x,0,0));group.add(mesh(new THREE.BoxGeometry(1.75,.24,.55),cyan,0,1.24,0));hitRadius=.98;}else if(index%4===2){group.add(mesh(new THREE.OctahedronGeometry(1.15,0),pink));group.add(mesh(new THREE.TorusGeometry(.86,.07,6,6),cyan));hitRadius=1.02;}else{group.add(mesh(new THREE.BoxGeometry(1.65,2.5,.65),pink));group.add(mesh(new THREE.BoxGeometry(1.9,.12,.85),cyan,0,1.28,0));}group.position.set(lane*2.2,-2.05,-110);scene.add(group);objects.push({mesh:group,gem:isGem,dancer,collectibleType,r:hitRadius,passed:false,arrivalBeat});}
 function finish(){running=false;track.pause();runId++;document.body.classList.remove('running');let saved=0;try{saved=Number(localStorage.getItem('makar-zhenya-3d-best')||0)||0;}catch{}const best=Math.max(score,saved);try{localStorage.setItem('makar-zhenya-3d-best',String(Math.floor(best)));}catch{}message.textContent='Счёт: '+Math.floor(score)+' · Рекорд: '+Math.floor(best)+' · Попробуй ещё раз!';play.textContent='ИГРАТЬ СНОВА →';screen.style.display='flex';if(master&&audio)master.gain.setTargetAtTime(0,audio.currentTime,.035);}
