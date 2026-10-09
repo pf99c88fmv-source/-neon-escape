@@ -3,7 +3,7 @@ import {EffectComposer} from 'three/addons/postprocessing/EffectComposer.js';
 import {RenderPass} from 'three/addons/postprocessing/RenderPass.js';
 import {UnrealBloomPass} from 'three/addons/postprocessing/UnrealBloomPass.js';
 import {OutputPass} from 'three/addons/postprocessing/OutputPass.js';
-import {SPB,SPEED,depth,zones,zoneAt} from './course.js';
+import {SPB,SPEED,depth,zones,zoneAt} from './course.js?v=vitty-audio-2';
 import {TunnelArchitecture} from './tunnel.js';
 const box=new T.BoxGeometry(1,1,1),orb=new T.IcosahedronGeometry(.38,1),pickupRing=new T.TorusGeometry(.58,.045,6,24);
 function mesh(g,m,x,y,z,sx=1,sy=1,sz=1){const o=new T.Mesh(g,m);o.position.set(x,y,z);o.scale.set(sx,sy,sz);return o;}
