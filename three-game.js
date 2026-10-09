@@ -128,6 +128,29 @@ for(let j=0;j<5;j++){const p=new THREE.Group(),radius=7.8-j*.8;
 }
 const ambienceBars=[];
 for(let i=0;i<16;i++){const side=i%2?-1:1;const bar=mesh(new THREE.BoxGeometry(.13,1.3+(i%4)*.35,.13),i%3?neonBlue:neonMagenta,side*(7.4+i%3),4.5+(i%4)*.32,-i*12);tunnel.add(bar);ambienceBars.push(bar);}
+// Layered moving light curtains: shared materials and low polygon counts for mobile.
+const curtainA=new THREE.MeshBasicMaterial({color:0x0be8ff,transparent:true,opacity:.16,depthWrite:false,side:THREE.DoubleSide,blending:THREE.AdditiveBlending});
+const curtainB=new THREE.MeshBasicMaterial({color:0xff35bd,transparent:true,opacity:.14,depthWrite:false,side:THREE.DoubleSide,blending:THREE.AdditiveBlending});
+const curtains=[];
+for(let i=0;i<10;i++){
+ const g=new THREE.Group();
+ for(const side of [-1,1]){
+  const blade=mesh(new THREE.PlaneGeometry(1.4,9.2),i%2?curtainB:curtainA,side*8.4,2.4,0,0,side*.35);
+  g.add(blade);
+  const strip=mesh(new THREE.BoxGeometry(.12,8.6,.12),i%2?neonMagenta:neonBlue,side*8.35,2.4,0);
+  g.add(strip);
+ }
+ g.position.z=-i*20;tunnel.add(g);curtains.push(g);
+}
+// Receding overhead light canopy adds depth and direction to the tunnel.
+const canopyPanels=[];
+for(let i=0;i<14;i++){
+ const g=new THREE.Group();
+ for(let k=-2;k<=2;k++){
+  g.add(mesh(new THREE.BoxGeometry(1.15,.085,2.2),k%2?neonViolet:neonBlue,k*2.1,9.15,0));
+ }
+ g.position.z=-i*14;tunnel.add(g);canopyPanels.push(g);
+}
 // Distant starfield and moving light strips make forward travel visible.
 const starPositions=new Float32Array(540*3);
 for(let i=0;i<540;i++){const j=i*3;starPositions[j]=(Math.random()-.5)*55;starPositions[j+1]=(Math.random()-.5)*36;starPositions[j+2]=-Math.random()*190;}
@@ -148,6 +171,13 @@ const flame=mesh(new THREE.ConeGeometry(.4,2.3,12),new THREE.MeshBasicMaterial({
 // Fighter detail pass: layered armored fuselage, illuminated rails and twin exhaust plumes.
 const armor=mat(0x172b54,0x0a2b50,.36),edgeGlow=new THREE.MeshBasicMaterial({color:0x49ecff});
 ship.add(mesh(new THREE.BoxGeometry(1.38,.19,1.9),armor,0,-.23,.15));
+// Wing-tip navigation lights and a luminous rear stabilizer.
+const shipPink=new THREE.MeshBasicMaterial({color:0xff3aa8});
+for(const side of [-1,1]){
+ ship.add(mesh(new THREE.SphereGeometry(.11,8,6),shipPink,side*2.25,-.09,1.1));
+ ship.add(mesh(new THREE.BoxGeometry(.09,.65,.55),edgeGlow,side*.75,.37,.87,0,0,side*.24));
+}
+
 ship.add(mesh(new THREE.BoxGeometry(.14,.13,2.55),edgeGlow,-.58,.08,-.23));
 ship.add(mesh(new THREE.BoxGeometry(.14,.13,2.55),edgeGlow,.58,.08,-.23));
 ship.add(mesh(new THREE.ConeGeometry(.34,1.5,4),cyan,0,.02,-2.25,-Math.PI/2));
@@ -360,7 +390,10 @@ window.addEventListener('keydown',e=>{if(e.key==='ArrowLeft')setLane(Math.round(
 play.addEventListener('click',()=>{if(contextLost){location.reload();return;}screen.style.display='';startGame();});mute.addEventListener('click',()=>{muted=!muted;mute.textContent=muted?'♪̸':'♫';track.muted=muted;if(trackAvailable)trackLabel(muted?'♪ ТРЕК БЕЗ ЗВУКА':'♫ VITTY ИГРАЕТ');if(master&&audio)master.gain.setTargetAtTime(muted||(trackAvailable&&!track.paused)?0:.55,audio.currentTime,.012);});
 function resize(){camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight);}window.addEventListener('resize',resize);
 document.addEventListener('visibilitychange',()=>{paused=document.hidden;last=0;if(audio){if(paused){track.pause();audio.suspend().catch(()=>{});}else if(running){if(trackAvailable)track.play().catch(()=>{});const activeRun=runId;audio.resume().then(()=>{if(!running||paused||activeRun!==runId)return;const currentStep=Math.max(0,Math.ceil((audio.currentTime-beatZero)/(beat/4)));note=currentStep;nextNote=beatZero+currentStep*(beat/4);}).catch(()=>{});}}});
-function animate(t){requestAnimationFrame(animate);const dt=last?Math.min((t-last)/1000,.04):0;last=t;const active=running&&!paused&&!contextLost;if(active&&dt>0){perfTime+=dt;perfFrames++;perfCooldown=Math.max(0,perfCooldown-dt);if(perfTime>=3){const fps=perfFrames/perfTime;lastKnownFps=Math.round(fps);if(running)statusEl.textContent=(Math.floor(Math.max(0,elapsed)/beat/16)%2===0?'DRIVE':'HYPERDRIVE')+' · 132 BPM · '+lastKnownFps+' FPS';if(perfCooldown===0&&fps<43&&renderScale>0.9){renderScale=Math.max(.9,renderScale-.2);renderer.setPixelRatio(renderScale);perfCooldown=6;}else if(perfCooldown===0&&fps>57&&renderScale<Math.min(devicePixelRatio,1.7)){renderScale=Math.min(Math.min(devicePixelRatio,1.7),renderScale+.1);renderer.setPixelRatio(renderScale);perfCooldown=8;}perfTime=0;perfFrames=0;}}if(active){elapsed+=dt;score+=dt*15;schedule();const speed=33+Math.min(35,elapsed*.45);const rhythmTime=trackAvailable&&!track.paused?track.currentTime:(audio&&beatZero>0&&audio.state==='running'?Math.max(0,audio.currentTime-beatZero):elapsed);while(nextSpawnTime<rhythmTime-1){nextSpawnTime+=beat*2;spawnBeat++;}let spawnedThisFrame=0;while(nextSpawnTime>=rhythmTime-1&&distanceBetween(rhythmTime,nextSpawnTime)<=110+collisionZ&&spawnedThisFrame<24){addObstacle(spawnBeat++,nextSpawnTime);nextSpawnTime+=beat*2;spawnedThisFrame++;}beatPulse=Math.max(0,1-(rhythmTime%beat)/beat);const visualBeat=Math.floor(rhythmTime/beat);if(visualBeat!==lastBeatVisual){lastBeatVisual=visualBeat;statusEl.textContent=(Math.floor(visualBeat/16)%2===0?'DRIVE':'HYPERDRIVE')+' · 132 BPM · '+lastKnownFps+' FPS';}const tunnelDistance=distanceAt(rhythmTime);for(let i=0;i<portalLayers.length;i++){portalLayers[i].rotation.z+=(i%2?-.12:.12)*dt;portalLayers[i].scale.setScalar(1+beatPulse*.025);}
+function animate(t){requestAnimationFrame(animate);const dt=last?Math.min((t-last)/1000,.04):0;last=t;const active=running&&!paused&&!contextLost;if(active&&dt>0){perfTime+=dt;perfFrames++;perfCooldown=Math.max(0,perfCooldown-dt);if(perfTime>=3){const fps=perfFrames/perfTime;lastKnownFps=Math.round(fps);if(running)statusEl.textContent=(Math.floor(Math.max(0,elapsed)/beat/16)%2===0?'DRIVE':'HYPERDRIVE')+' · 132 BPM · '+lastKnownFps+' FPS';if(perfCooldown===0&&fps<43&&renderScale>0.9){renderScale=Math.max(.9,renderScale-.2);renderer.setPixelRatio(renderScale);perfCooldown=6;}else if(perfCooldown===0&&fps>57&&renderScale<Math.min(devicePixelRatio,1.7)){renderScale=Math.min(Math.min(devicePixelRatio,1.7),renderScale+.1);renderer.setPixelRatio(renderScale);perfCooldown=8;}perfTime=0;perfFrames=0;}}if(active){elapsed+=dt;score+=dt*15;schedule();const speed=33+Math.min(35,elapsed*.45);const rhythmTime=trackAvailable&&!track.paused?track.currentTime:(audio&&beatZero>0&&audio.state==='running'?Math.max(0,audio.currentTime-beatZero):elapsed);while(nextSpawnTime<rhythmTime-1){nextSpawnTime+=beat*2;spawnBeat++;}let spawnedThisFrame=0;while(nextSpawnTime>=rhythmTime-1&&distanceBetween(rhythmTime,nextSpawnTime)<=110+collisionZ&&spawnedThisFrame<24){addObstacle(spawnBeat++,nextSpawnTime);nextSpawnTime+=beat*2;spawnedThisFrame++;}beatPulse=Math.max(0,1-(rhythmTime%beat)/beat);const visualBeat=Math.floor(rhythmTime/beat);if(visualBeat!==lastBeatVisual){lastBeatVisual=visualBeat;statusEl.textContent=(Math.floor(visualBeat/16)%2===0?'DRIVE':'HYPERDRIVE')+' · 132 BPM · '+lastKnownFps+' FPS';}const tunnelDistance=distanceAt(rhythmTime);for(let i=0;i<curtains.length;i++){const g=curtains[i];g.position.z=12-(((i*20-tunnelDistance)%(curtains.length*20)+(curtains.length*20))%(curtains.length*20));g.rotation.z=Math.sin(rhythmTime*.7+i)*.025;}
+for(let i=0;i<canopyPanels.length;i++){canopyPanels[i].position.z=12-(((i*14-tunnelDistance)%(canopyPanels.length*14)+(canopyPanels.length*14))%(canopyPanels.length*14));}
+curtainA.opacity=.1+beatPulse*.12;curtainB.opacity=.08+beatPulse*.13;
+for(let i=0;i<portalLayers.length;i++){portalLayers[i].rotation.z+=(i%2?-.12:.12)*dt;portalLayers[i].scale.setScalar(1+beatPulse*.025);}
 portalGroup.position.z=-108+Math.sin(rhythmTime*.35)*3;
 for(let i=0;i<ambienceBars.length;i++){const bar=ambienceBars[i];bar.position.z=12-(((i*12-tunnelDistance)%(ambienceBars.length*12)+(ambienceBars.length*12))%(ambienceBars.length*12));bar.scale.y=1+beatPulse*.7;}
 for(let i=0;i<rings.length;i++)rings[i].position.z=12-(((i*8-tunnelDistance)%(rings.length*8)+(rings.length*8))%(rings.length*8));for(let i=0;i<floorBars.length;i++)floorBars[i].position.z=11-(((i*11-tunnelDistance)%(floorBars.length*11)+(floorBars.length*11))%(floorBars.length*11));pulseFloor.opacity=.35+beatPulse*.5;ceilingGlow.intensity=12+beatPulse*20;
