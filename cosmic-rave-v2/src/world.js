@@ -5,7 +5,7 @@ import {UnrealBloomPass} from 'three/addons/postprocessing/UnrealBloomPass.js';
 import {OutputPass} from 'three/addons/postprocessing/OutputPass.js';
 import {SPB,SPEED,depth,zones,zoneAt,isPickup} from './course.js?v=arcade-finish-2';
 import {TunnelArchitecture} from './tunnel.js?v=arcade-finish-2';
-import {RaveShow} from './rave-show.js?v=arcade-finish-2';
+import {RaveShow} from './rave-show.js?v=cash-hover-1';
 import {TunnelAtmosphere} from './tunnel-atmosphere.js';
 import {createCosmicBackdrop} from './cosmic-sky.js';
 import {ShaderPass} from 'three/addons/postprocessing/ShaderPass.js';
@@ -97,6 +97,11 @@ export class World{
   if(e.kind==='dancer'){
    o.rotation.y=Math.sin(beat*.19+e.id)*.30;
    o.position.y=Math.sin(beat*Math.PI*2)*.045;
+  }else if(e.kind==='cash'){
+   // The actual banknote mesh lives at y=2.20 in its pickup group.
+   // Float the entire item gently, never back down into the track.
+   o.rotation.y=Math.sin(beat*.27+e.id)*.30;
+   o.position.y=Math.sin(beat*2*Math.PI+e.id)*.12;
   }else{
    o.rotation.y=Math.sin(beat*.27+e.id)*.25;
    o.position.y=Math.sin(beat*2*Math.PI+e.id)*.038;
