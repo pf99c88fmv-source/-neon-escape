@@ -7,11 +7,13 @@ export class AudioEngine{
  }
  async load(){
   if(this.buffer)return;
-  const [metaResponse,audioResponse]=await Promise.all([fetch('./assets/audio/track.json'),fetch('./assets/audio/techno-rush-3d.mp3')]);
+  const [metaResponse,audioResponse]=await Promise.all([fetch('./assets/audio/vitty-track.json?v=vitty-1'),fetch('../makar-zhenya-soundtrack.mp3?v=vitty-1')]);
   if(!metaResponse.ok||!audioResponse.ok)throw Error('Не удалось загрузить музыку. Проверь соединение и повтори.');
   const meta=await metaResponse.json(),bytes=await audioResponse.arrayBuffer();
+  if(meta.bpm!==132||meta.title!=='VITTY — Out Of My Mind (Original Mix)')throw Error('Неверная конфигурация музыкального трека.');
   if(globalThis.crypto?.subtle){const digest=await crypto.subtle.digest('SHA-256',bytes);const hash=Array.from(new Uint8Array(digest),b=>b.toString(16).padStart(2,'0')).join('');if(hash!==meta.sha256)throw Error('Музыка загрузилась с ошибкой. Обнови страницу.');}
   this.buffer=await this.context.decodeAudioData(bytes);this.meta=meta;
+  if(Math.abs(this.buffer.duration-meta.duration)>2)throw Error('Загружен неправильный аудиофайл — продолжительность не совпадает.');
  }
  start(offset=0,countIn=true){
   this.stop();this.offset=offset;this.active=true;const delay=countIn?4*SPB:.04;this.startAt=this.context.currentTime+delay;this.perfStartAt=performance.now()+delay*1000;
