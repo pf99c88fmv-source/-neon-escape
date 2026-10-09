@@ -1,3 +1,4 @@
+import {SPB} from './course.js';
 import * as T from 'three';
 import {GLTFLoader} from 'three/addons/loaders/GLTFLoader.js';
 export class Character{
@@ -18,7 +19,7 @@ diffuseColor.rgb=mix(diffuseColor.rgb,jacket,outfit);
  update(dt,beat,x,active,hit=false){if(!this.mixer)return;this.root.position.x=x;this.root.rotation.z=T.MathUtils.damp(this.root.rotation.z,-(x-(this.lastX??x))*.25,10,dt);this.lastX=x;
  if(hit)this.until=beat+1;
  this.play(this.result||(hit||beat<this.until?'Hit_Chest':active?(beat>=144?'Sprint_Loop':'Jog_Fwd_Loop'):'Dance_Loop'));
- const action=this.actions[this.current];if(active&&!/Hit/.test(this.current))action.timeScale=action.getClip().duration/(2*60/140);else action.timeScale=1;
+ const action=this.actions[this.current];if(active&&!/Hit/.test(this.current))action.timeScale=action.getClip().duration/(2*SPB);else action.timeScale=1;
  this.mixer.update(dt);if(active&&this.head)this.head.rotation.x+=Math.sin(beat*Math.PI*2)*.035;
  }
 }
