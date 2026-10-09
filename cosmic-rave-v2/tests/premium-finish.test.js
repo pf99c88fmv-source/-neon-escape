@@ -86,6 +86,6 @@ test('UI remains uncluttered and original VITTY audio stays selected',()=>{
  const audio=code('audio.js');
  assert.doesNotMatch(html,/id="track-label"/);
  assert.match(html,/class="menu-brand">МАКАР/);
- assert.match(html,/src\/app\.js\?v=arcade-finish-2/);
+ assert.match(html,/src\/app\.js\?v=cash-hover-1/);
  assert.match(audio,/makar-zhenya-soundtrack\.mp3/);
 });
