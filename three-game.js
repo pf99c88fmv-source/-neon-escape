@@ -191,7 +191,7 @@ const cashTexture=paintedTexture((c,w,h)=>{
  for(let i=0;i<12;i++){c.strokeStyle='rgba(35,92,57,.23)';c.lineWidth=2;c.beginPath();c.moveTo(i*48,0);c.lineTo(i*48-55,h);c.stroke();}
  c.fillStyle='#24563c';c.textAlign='center';c.font='bold 43px Georgia';c.fillText('100',68,66);c.fillText('100',w-70,h-24);
  c.beginPath();c.ellipse(w/2,h/2,73,91,0,0,Math.PI*2);c.strokeStyle='#24563c';c.lineWidth=9;c.stroke();
- c.font='bold 92px Georgia';c.fillText('
+ c.font='bold 92px Georgia';c.fillText('$',w/2,h/2+30);c.font='bold 18px Georgia';c.fillText('ONE HUNDRED DOLLARS',w/2,h-17);
  c.font='bold 23px Georgia';c.fillText('UNITED STATES',w/2,33);
 });
 // Reusable sculpted silhouette details. No external downloads, works offline.
