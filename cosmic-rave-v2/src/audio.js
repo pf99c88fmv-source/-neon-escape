@@ -1,4 +1,4 @@
-import {SPB} from './course.js';
+import {SPB} from './course.js?v=vitty-audio-2';
 export class AudioEngine{
  constructor(){this.context=null;this.buffer=null;this.source=null;this.ticks=[];this.offset=0;this.startAt=0;this.perfStartAt=0;this.active=false;this.volume=.82;this.effects=.45;}
  async unlock(){
