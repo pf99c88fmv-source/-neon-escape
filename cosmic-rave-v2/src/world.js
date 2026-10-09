@@ -60,6 +60,8 @@ export class World{
  constructor(canvas){this.renderer=new T.WebGLRenderer({canvas,antialias:false,powerPreference:'high-performance'});this.renderer.outputColorSpace=T.SRGBColorSpace;this.renderer.toneMapping=T.ACESFilmicToneMapping;this.renderer.toneMappingExposure=.99;
  this.scene=new T.Scene();this.scene.fog=new T.FogExp2(0x070c20,.0058);this.camera=new T.PerspectiveCamera(62,innerWidth/innerHeight,.1,450);this.distance=8.3;this.reduced=true;this.scene.add(new T.HemisphereLight(0xc6e9ff,0x352149,2.5));const key=new T.DirectionalLight(0xf1e6ff,3.5);key.position.set(-3,7,4);this.scene.add(key);this.rim=new T.PointLight(0x12ddff,52,22);this.rim.position.set(0,4,3);this.scene.add(this.rim);
  this.metal=new T.MeshStandardMaterial({color:0x32445d,metalness:.86,roughness:.26});this.dark=new T.MeshStandardMaterial({color:0x091327,metalness:.68,roughness:.4});this.neon=new T.MeshStandardMaterial({color:0x32d9ff,emissive:0x00bfff,emissiveIntensity:2,metalness:.3,roughness:.3});this.accent=new T.MeshStandardMaterial({color:0x884fff,emissive:0x7933ff,emissiveIntensity:1.6});this.red=new T.MeshStandardMaterial({color:0xff3979,emissive:0xb90832,emissiveIntensity:1.5,metalness:.35,roughness:.3});this.gold=new T.MeshStandardMaterial({color:0xffd475,emissive:0xffa629,emissiveIntensity:1.3,metalness:.6,roughness:.2});
+ this.pickupMint=new T.MeshBasicMaterial({color:0x59ffb6});
+ this.pickupPink=new T.MeshBasicMaterial({color:0xff66ca});
  this.tunnel=new TunnelArchitecture(this.scene,{metal:this.metal,dark:this.dark,neon:this.neon,accent:this.accent});
  this.show=new RaveShow(this.scene);
  // Volumetric-looking nebula, layered starfield and detailed planets.
@@ -78,7 +80,7 @@ export class World{
  );
 }
  reset(){for(const o of this.objects.values()){this.show.releasePickup(o);this.scene.remove(o);}this.objects.clear();for(const p of this.particles)this.scene.remove(p);this.particles=[];}
- burst(x,hit=false){for(let i=0;i<16;i++){const p=mesh(orb,hit?this.red:this.gold,x,1.3,0,.15,.15,.15);p.userData={life:1,v:new T.Vector3(Math.sin(i*2.4)*3,1+Math.cos(i)*2,Math.cos(i*2.4)*3)};this.scene.add(p);this.particles.push(p);}}
+ burst(x,hit=false,kind='orb'){const sparkle=hit?this.red:kind==='dancer'?this.pickupPink:kind==='cash'?this.pickupMint:this.gold;for(let i=0;i<16;i++){const p=mesh(orb,sparkle,x,1.3,0,.15,.15,.15);p.userData={life:1,v:new T.Vector3(Math.sin(i*2.4)*3,1+Math.cos(i)*2,Math.cos(i*2.4)*3)};this.scene.add(p);this.particles.push(p);}}
  update(beat,dt,run,active){const z=zoneAt(beat),zone=zones[z];this.neon.color.lerp(new T.Color(zone.color),dt);this.neon.emissive.lerp(new T.Color(zone.color),dt);this.accent.emissive.lerp(new T.Color(zone.accent),dt);const pulse=Math.exp(-(beat%1)*8);this.neon.emissiveIntensity=1.4+pulse*(this.reduced?.2:.7);this.rim.intensity=43+pulse*11;this.backdrop.update(beat,dt);this.portal.rotation.z=Math.sin(beat*.04)*.18;
  const travel=beat*SPB*SPEED;this.tunnel.update(travel,beat,this.reduced);this.show.update(beat,dt,travel);
  this.lasers.forEach((g,i)=>{g.rotation.z=Math.sin(beat*.22+i)*.55;g.rotation.x=Math.cos(beat*.14+i)*.2;});
