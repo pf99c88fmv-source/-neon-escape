@@ -181,7 +181,7 @@ export function styleNightclubDancer(person){
   const apply=base=>{
    if(!base?.isMeshStandardMaterial)return base;
    const m=base.clone();
-   m.roughness=.63;m.metalness=.07;
+   m.roughness=.63;m.metalness=.07;m.userData={...m.userData,stageOwned:true};
    const prior=m.onBeforeCompile;
    m.onBeforeCompile=shader=>{
     prior?.(shader);
