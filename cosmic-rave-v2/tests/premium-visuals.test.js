@@ -48,5 +48,5 @@ test('premium view keeps exact VITTY audio and never edits the game state',()=>{
  const app=readFileSync(new URL('../src/app.js',import.meta.url),'utf8');
  assert.match(audio,/makar-zhenya-soundtrack\.mp3/);
  assert.doesNotMatch(audio,/techno-rush-3d\.mp3/);
- assert.match(app,/import \{World\} from '.\/world\.js\?v=stage2-arcade-1'/);
+ assert.match(app,/import \{World\} from '.\/world\.js\?v=arcade-finish-1'/);
 });
