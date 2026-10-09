@@ -1,0 +1,55 @@
+import {World} from './world.js?v=cathedral-2';import {Character} from './character.js?v=premium-outfit-1';import {Input} from './input.js';import {AudioEngine} from './audio.js?v=vitty132-1';import {Run,SPB,DURATION,zones,zoneAt} from './course.js?v=arcade-finish-2';import {read,save} from './save.js';
+const $=s=>document.querySelector(s),world=new World($('#scene')),hero=new Character(world.scene),audio=new AudioEngine();let state='loading',run=new Run(),last=0,menuBeat=0,generation=0,toastUntil=0,frames=[],autoTime=0,audioRecoveryPending=false,silenceSince=0,lastSilentAlert=0;
+const prefs={quality:'auto',control:'lanes',reduced:true,volume:.8,distance:8.3,zen:false,...read().settings};
+const input=new Input($('#scene'),x=>run.target=x,()=>pause());
+const tg=window.Telegram?.WebApp;try{tg?.ready();tg?.expand();tg?.setHeaderColor('#07091a');tg?.setBackgroundColor('#07091a');tg?.disableVerticalSwipes?.();tg?.onEvent('deactivated',()=>pause());tg?.BackButton?.onClick(()=>pause());}catch{}
+function apply(){world.quality(prefs.quality);world.reduced=prefs.reduced;world.distance=+prefs.distance;input.mode=prefs.control;audio.setVolume(+prefs.volume,.32);save({settings:prefs});}
+function screen(name){for(const s of ['menu','paused','results','dialog'])$('#'+s).hidden=s!==name;const playing=name===null;$('#hud').hidden=!playing;$('#pause').hidden=!playing;$('#zone').hidden=!playing;document.body.classList.toggle('playing',playing);input.enabled=playing;}
+function toast(text,duration=1.3){$('#toast').textContent=text;toastUntil=performance.now()+duration*1000;}
+async function start(resume=false){const token=++generation;state='loading';$('#play').disabled=true;$('#resume').disabled=true;try{await audio.unlock();await audio.load();if(token!==generation)return;if(!resume){hero.result=null;run=new Run(prefs.zen);world.reset();input.reset();}audio.start(resume?audio.offset:0);state='countdown';screen(null);input.enabled=true;$('#load').textContent='';}catch(e){state='menu';screen('menu');$('#load').textContent=e.message;}finally{$('#play').disabled=false;$('#resume').disabled=false;}}
+function pause(reason='manual'){
+ if(!['running','countdown'].includes(state))return;
+ audio.pause();generation++;state='paused';screen('paused');$('#toast').textContent='';
+ $('#paused p').textContent=reason==='hidden'?'Вкладка была свернута. Нажми «Продолжить».':'Твой ритм подождёт.';
+}
+function home(){generation++;audio.stop();state='menu';hero.result=null;world.reset();run=new Run();screen('menu');$('#toast').textContent='';}
+function finish(){audio.stop();state='results';hero.result=run.health<=0?'Death01':'Dance_Loop';input.enabled=false;const score=Math.round(run.score),old=read().best||0;if(!run.zen)save({best:Math.max(old,score)});$('#result-title').textContent=run.health>0?'ДРОП ПРОЙДЕН':'ЕЩЁ ОДИН РИТМ';$('#result-score').textContent=score.toLocaleString('ru');$('#result-details').textContent=`Рекорд: ${Math.max(old,run.zen?0:score)} · Уклонений: ${run.dodged}${run.zen?' · Свободный рейв':''}`;screen('results');}
+function dialog(title,html){$('#dialog-title').textContent=title;$('#dialog-body').innerHTML=html;screen('dialog');}
+$('#settings').onclick=()=>{dialog('ТВОЙ РЕЙВ',`<label>Графика<select id="quality">${['auto','low','balanced','ultra'].map(x=>`<option ${x===prefs.quality?'selected':''} value="${x}">${x.toUpperCase()}</option>`).join('')}</select></label><label>Управление<select id="control"><option value="lanes">Дорожки</option><option value="free">Плавное</option></select></label><label>Меньше вспышек<input id="reduced" type="checkbox" ${prefs.reduced?'checked':''}></label><label>Музыка<input id="volume" type="range" min="0" max="1" step=".05" value="${prefs.volume}"></label><label>Камера<input id="distance" type="range" min="7.5" max="11" step=".5" value="${prefs.distance}"></label><label>Без столкновений<input id="zen" type="checkbox" ${prefs.zen?'checked':''}></label>`);$('#control').value=prefs.control;for(const id of ['quality','control','reduced','volume','distance','zen'])$('#'+id).onchange=e=>{prefs[id]=e.target.type==='checkbox'?e.target.checked:e.target.value;apply();};};
+$('#records').onclick=()=>dialog('ТВОЙ РЕКОРД',`<p class="record">${(read().best||0).toLocaleString('ru')} очков</p><p>Рекорд хранится на этом устройстве.<br>Свободный рейв не участвует в зачёте.</p>`);
+$('#character').onclick=()=>dialog('BLACKLIGHT RAVER','<p>Тёмный клубный техвир, неоновые вставки и наушники.<br>Скелетный бег + танцевальный грув плеч и корпуса под музыку.</p><p>Основа модели и движений: Quaternius · CC0.<br>Дополнительные образы появятся позже.</p>');
+$('#close').onclick=()=>screen('menu');$('#play').onclick=()=>start();$('#again').onclick=()=>start();$('#resume').onclick=()=>start(true);$('#pause').onclick=()=>pause('manual');$('#home').onclick=home;$('#exit').onclick=home;
+// The iPhone browser can dispatch blur when its UI changes or music starts.
+// Blur is not a real pause request; only a genuinely hidden page should pause.
+document.addEventListener('visibilitychange',()=>{if(document.hidden)pause('hidden');});
+audio.onend=()=>{if(state==='running')finish();};
+$('#scene').addEventListener('pointerdown',()=>{
+ if(!['running','countdown'].includes(state)||audioRecoveryPending||audio.context?.state==='running')return;
+ audioRecoveryPending=true;
+ // Must call AudioContext.resume() directly in the touch gesture on iOS.
+ audio.recover().then(ok=>{
+  if(ok&&['running','countdown'].includes(state))toast('ЗВУК ВОССТАНОВЛЕН');
+ }).catch(e=>console.warn('Audio recovery failed',e)).finally(()=>{audioRecoveryPending=false;});
+},{passive:true});
+$('#scene').addEventListener('webglcontextlost',e=>{e.preventDefault();pause();$('#fatal').hidden=false;$('#fatal p').textContent='Графическая система приостановлена. Перезагрузи игру — рекорд сохранён.';});
+function frame(now){requestAnimationFrame(frame);const dt=Math.min(.05,last?(now-last)/1000:0);last=now;let beat=run.beat,hit=false;
+ if(state==='countdown'){const remain=audio.remainingCountIn();if(remain>0)toast(String(Math.ceil(remain/SPB)),.2);else{state='running';toast('ПОЙМАЙ РИТМ');}}
+ if(state==='running'){beat=audio.beat();run.update(beat,dt);for(const f of run.feedback.splice(0)){audio.sound(f.type);world.burst(f.x,f.type==='hit',f.type);if(f.type==='hit'){hit=true;toast('ДЕРЖИ РИТМ');}
+   else if(f.type==='dancer')toast('RAVE GIRL +300');
+   else if(f.type==='bottle')toast('BOTTLE +200');
+   else if(f.type==='cash')toast('DOLLAR ROLL +250');
+   else if(f.type==='shield')toast('ЩИТ');
+   else if(run.combo%8===0)toast('RAVE COMBO ×'+run.multiplier);try{tg?.HapticFeedback?.impactOccurred?.(f.type==='hit'?'medium':'light');}catch{}}
+ $('#score').textContent=String(Math.round(run.score)).padStart(6,'0');$('#combo').textContent='×'+run.multiplier;$('#health').textContent='♥ '.repeat(Math.max(0,run.health))+(run.shield?' ◇':'');$('#zone span').textContent=zones[zoneAt(beat)].name;$('#progress i').style.width=(beat/DURATION*100)+'%';if(run.done)finish();
+ }else if(state==='menu'||state==='loading'){menuBeat+=dt*.6;beat=menuBeat;}
+ if(['running','countdown'].includes(state)&&audio.context&&audio.context.state!=='running'){
+  if(!silenceSince)silenceSince=now;
+  if(now-silenceSince>800&&now-lastSilentAlert>1700){
+   toast('НЕТ ЗВУКА · КОСНИСЬ ЭКРАНА',1.6);lastSilentAlert=now;
+  }
+ }else silenceSince=0;
+ if(now>toastUntil)$('#toast').textContent='';if(state!=='paused')hero.update(dt,beat,run.x,state==='running'||state==='countdown',hit,run.combo);world.update(beat,dt,['menu','loading'].includes(state)?null:run,state==='running');world.render();
+ if(state==='running'&&dt>0){frames.push(dt);autoTime+=dt;if(frames.length>600)frames.shift();if(autoTime>5&&prefs.quality==='auto'){const average=frames.reduce((a,b)=>a+b,0)/frames.length;if(average>.026)world.quality('low');autoTime=0;}}
+}
+apply();requestAnimationFrame(frame);
+hero.load().then(()=>{state='menu';$('#play').disabled=false;$('#play').textContent='ИГРАТЬ  ↗';$('#load').textContent='';}).catch(e=>{state='error';$('#load').textContent='Не загрузился персонаж. Обнови страницу или проверь соединение.';console.error(e);});

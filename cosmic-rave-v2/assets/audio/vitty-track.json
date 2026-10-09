@@ -1,0 +1,31 @@
+{
+  "title": "VITTY — Out Of My Mind (Original Mix)",
+  "bpm": 132,
+  "beats": 724,
+  "duration": 329.16898,
+  "sha256": "b74454eaff301ed1c32e451b92c39691a2f4be0d94d8334d979bfce85f0edc81",
+  "sampleRate": 44100,
+  "source": "../makar-zhenya-soundtrack.mp3",
+  "userProvided": true,
+  "rightsStatus": "Public distribution rights have not been verified; user confirmation required before promoting or monetizing.",
+  "sections": [
+    {
+      "beat": 0,
+      "name": "opening"
+    },
+    {
+      "beat": 181,
+      "name": "zone_2"
+    },
+    {
+      "beat": 362,
+      "name": "zone_3"
+    },
+    {
+      "beat": 543,
+      "name": "zone_4"
+    }
+  ],
+  "beatOffsetSeconds": 0,
+  "beatOffsetStatus": "Unverified: BPM estimated from analysis; onset offset and drops are not manually mapped."
+}
