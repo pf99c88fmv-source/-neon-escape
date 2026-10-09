@@ -72,7 +72,7 @@ test('pickup model is event-seeded and cleans optional dancer resources',()=>{
 });
 test('smooth tunnel uses advanced arch geometry and mobile-budget light atmosphere',()=>{
  const tunnel=code('tunnel.js'),fog=code('tunnel-atmosphere.js'),world=code('world.js');
- assert.match(tunnel,/archPoints\),88,\.12,10,false/);
+ assert.match(tunnel,/archPoints\),90,\.19,10,false/);
  assert.match(tunnel,/magentaHalo/);
  assert.match(tunnel,/this\.materials\.halo\.opacity/);
  assert.match(fog,/const COLORS=\[/);
@@ -86,7 +86,7 @@ test('UI remains uncluttered and original VITTY audio stays selected',()=>{
  const audio=code('audio.js');
  assert.doesNotMatch(html,/id="track-label"/);
  assert.match(html,/class="menu-brand">МАКАР/);
- assert.match(html,/src\/app\.js\?v=cash-hover-1/);
+ assert.match(html,/src\/app\.js\?v=cathedral-2/);
  assert.match(audio,/makar-zhenya-soundtrack\.mp3/);
 });
 
