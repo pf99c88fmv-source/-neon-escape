@@ -386,9 +386,54 @@ for(const side of [-1,1]){
   const boot=shins[side===-1?0:1];
   boot.add(mesh(new THREE.BoxGeometry(.31,.11,.57),neon,0,-.48,-.14));
  }
+ // v4.7: distinctive rave performers, layered garments, hair ornaments and articulated accessories.
+ const glowTrim=new THREE.MeshBasicMaterial({color,transparent:true,opacity:.92,depthWrite:false});
+ const jewel=new THREE.MeshPhysicalMaterial({color:0xf5e4ff,metalness:.72,roughness:.12,clearcoat:1});
+ // Festival jacket/halter accents: curved shoulder guards and luminous diagonal straps.
+ for(const side of [-1,1]){
+  const pad=mesh(new THREE.SphereGeometry(.23,12,8),outfit,side*.36,.27,.03);
+  pad.scale.set(1.12,.46,1.1);torso.add(pad);
+  torso.add(mesh(new THREE.BoxGeometry(.055,.58,.07),glowTrim,side*.16,.05,-.32,0,0,side*.34));
+  torso.add(mesh(new THREE.SphereGeometry(.065,8,6),jewel,side*.2,.29,-.3));
+  // Fingerless neon gloves.
+  const wrist=forearms[side===-1?0:1];
+  wrist.add(mesh(new THREE.CylinderGeometry(.13,.12,.23,9),outfit,0,-.41,0));
+  wrist.add(mesh(new THREE.TorusGeometry(.128,.027,5,10),glowTrim,0,-.38,0,Math.PI/2));
+  // Boots with bright laces.
+  const boot=shins[side===-1?0:1];
+  for(let k=0;k<3;k++)boot.add(mesh(new THREE.BoxGeometry(.2,.025,.035),glowTrim,0,-.26-k*.09,-.178));
+ }
+ // Real 3D facial features rather than flat painted dots.
+ const brows=new THREE.MeshStandardMaterial({color:variant%2?0x25121b:0x4c2b24,roughness:.8});
+ for(const side of [-1,1]){
+  headPivot.add(mesh(new THREE.BoxGeometry(.14,.026,.04),brows,side*.11,.43,-.258,0,0,side*.1));
+  headPivot.add(mesh(new THREE.SphereGeometry(.043,8,6),jewel,side*.11,.345,-.323));
+ }
+ headPivot.add(mesh(new THREE.SphereGeometry(.062,9,7),skin,0,.265,-.265));
+ // Ear-mounted headset and a curved mic arm.
+ const headset=new THREE.Group();headPivot.add(headset);
+ headset.add(mesh(new THREE.TorusGeometry(.315,.032,6,18),silver,0,.38,.025));
+ headset.add(mesh(new THREE.SphereGeometry(.12,10,8),outfit,.285,.35,0));
+ headset.add(mesh(new THREE.BoxGeometry(.035,.25,.035),silver,.34,.18,-.14,0,0,.4));
+ headset.add(mesh(new THREE.SphereGeometry(.045,8,6),glowTrim,.29,.075,-.2));
+ // Animated ponytail ribbons make the dance motion readable at a distance.
+ const ribbons=[];
+ for(let i=0;i<3;i++){
+  const ribbon=new THREE.Group();
+  ribbon.position.set((i-1)*.12,.35,.28);
+  ribbon.add(mesh(new THREE.CapsuleGeometry(.045,.55+i*.1,3,6),i%2?glowTrim:hairMat,0,-.34,0));
+  hairTail.add(ribbon);ribbons.push(ribbon);
+ }
+ // Holographic wrist bands move with the arms.
+ const bracelets=[];
+ for(let i=0;i<2;i++){
+  const band=new THREE.Group();
+  band.add(mesh(new THREE.TorusGeometry(.17,.04,5,14),glowTrim,0,-.43,0,Math.PI/2));
+  forearms[i].add(band);bracelets.push(band);
+ }
  const halo=mesh(new THREE.TorusGeometry(.95,.06,6,24),neon,0,-1.7,0,Math.PI/2);dancer.add(halo);
  dancer.scale.setScalar(1.8);
- dancer.userData={arms,forearms,legs,shins,headPivot,torso,hips,halo,style:variant};
+ dancer.userData={arms,forearms,legs,shins,headPivot,torso,hips,halo,ribbons,bracelets,glowTrim,style:variant};
  return dancer;
 }
 function makeWhiskyBottle(){
@@ -483,6 +528,6 @@ for(let i=0;i<wallPanels.length;i++)wallPanels[i].position.z=12-(((i*12-tunnelDi
 for(let i=0;i<clubDecor.length;i++)clubDecor[i].position.z=12-(((i*16-tunnelDistance)%(clubDecor.length*16)+(clubDecor.length*16))%(clubDecor.length*16));
 for(const item of laserBeams){const fixture=item.pivot;fixture.position.z=12-(((item.index*16+6-tunnelDistance)%(laserBeams.length*16)+(laserBeams.length*16))%(laserBeams.length*16));fixture.rotation.z=item.side*(.25+Math.sin(rhythmTime*1.2+item.index*.8)*.35);fixture.rotation.x=Math.sin(rhythmTime*.9+item.index)*.18;}
 laserMaterialA.opacity=.32+beatPulse*.52;laserMaterialB.opacity=.22+beatPulse*.6;
-for(let i=0;i<waveRings.length;i++){const w=waveRings[i];w.position.z=10-(((i*30+18-tunnelDistance)%(waveRings.length*30)+(waveRings.length*30))%(waveRings.length*30));const pulse=1+beatPulse*.09;w.scale.set(pulse,pulse,1);w.material.opacity=.16+beatPulse*.55;}for(let i=0;i<starPositions.length;i+=3){starPositions[i+2]+=dt*speed*.7;if(starPositions[i+2]>12)starPositions[i+2]-=190;}starGeometry.attributes.position.needsUpdate=true;ship.position.x=THREE.MathUtils.damp(ship.position.x,desiredX,8.5,dt);ship.rotation.z=THREE.MathUtils.damp(ship.rotation.z,THREE.MathUtils.clamp(-(desiredX-ship.position.x)*.15,-.3,.3),7,dt);ship.rotation.y=THREE.MathUtils.damp(ship.rotation.y,THREE.MathUtils.clamp(-(desiredX-ship.position.x)*.12,-.25,.25),7,dt);ship.position.y=-2.1+Math.sin(elapsed*3.5)*.07;ship.position.z=1.1;shipGlow.intensity=7+Math.pow(beatPulse,3)*10;flame.scale.y=1+Math.sin(elapsed*40)*.14;invulnerable=Math.max(0,invulnerable-dt);ship.visible=invulnerable===0||Math.sin(elapsed*28)>0;for(let i=objects.length-1;i>=0;i--){const o=objects[i];o.mesh.position.z=collisionZ+(rhythmTime>=o.arrivalBeat?distanceBetween(o.arrivalBeat,rhythmTime):-distanceBetween(rhythmTime,o.arrivalBeat));if(o.gem&&!o.dancer){o.mesh.rotation.y+=dt*1.4;o.mesh.position.y=-2.05+Math.sin(rhythmTime*4+o.arrivalBeat)*.18;}if(o.gem&&o.dancer){const d=o.dancer.userData;const phase=rhythmTime*Math.PI*2/beat;const motion=phase+(d.style*1.7);d.arms[0].rotation.z=d.style===0?-1.8+Math.sin(motion)*.3:d.style===1?Math.sin(motion)*1.3-.8:-1.3+Math.sin(motion*2)*.7;d.arms[1].rotation.z=d.style===0?1.8+Math.cos(motion)*.3:d.style===1?-Math.sin(motion+1.1)*1.3+.8:1.3-Math.cos(motion*2)*.7;d.arms[0].rotation.x=Math.cos(motion)*.5;d.arms[1].rotation.x=-Math.cos(motion)*.5;d.legs[0].rotation.x=Math.sin(motion)*(d.style===2?.85:.55);d.legs[1].rotation.x=-Math.sin(motion)*(d.style===2?.85:.55);o.dancer.position.y=Math.abs(Math.sin(motion))*.22;o.dancer.rotation.y=Math.sin(motion*.5)*.24;d.torso.rotation.z=Math.sin(motion*.5)*.3;d.torso.rotation.x=Math.sin(motion)*.16;d.headPivot.rotation.y=Math.sin(motion*.75)*.48;d.hips.rotation.y=Math.sin(motion*.5)*.32;d.forearms[0].rotation.z=-.6+Math.sin(motion*1.3)*.7;d.forearms[1].rotation.z=.6-Math.cos(motion*1.3)*.7;d.shins[0].rotation.x=Math.max(0,Math.sin(motion))*.6;d.shins[1].rotation.x=Math.max(0,-Math.sin(motion))*.6;d.halo.rotation.z+=dt*.65;d.headPivot.rotation.z=Math.sin(motion*.65)*.12;}else if(!o.gem&&o.mesh.children.length)o.mesh.rotation.z=Math.sin(rhythmTime*2+o.arrivalBeat)*.12;if(!o.gem&&!o.passed&&o.arrivalBeat-rhythmTime>0&&o.arrivalBeat-rhythmTime<.55&&Math.abs(o.mesh.position.x-ship.position.x)<o.r+.6)warningFlash=Math.max(warningFlash,1-(o.arrivalBeat-rhythmTime)/.55);if(!o.passed&&rhythmTime>=o.arrivalBeat){o.passed=true;if(Math.abs(o.mesh.position.x-ship.position.x)<o.r+(o.gem?1.25:.6)){if(o.gem){spawnPickupBurst(o.mesh.position.x,o.mesh.position.y,o.mesh.position.z,o.collectibleType);streak++;score+=100*multiplier();combo+=2;if(streak>0&&streak%10===0){score+=500;trackLabel('RAVE COMBO +500');}trackLabel(o.collectibleType==='whisky'?'✦ +100 ВИСКИ':o.collectibleType==='dollars'?'✦ +100 ДОЛЛАРЫ':'✦ +100 РЕЙВЕР');setTimeout(()=>{if(running)trackLabel(track.paused?'♫ ВКЛЮЧИТЬ ТРЕК':'♫ VITTY ИГРАЕТ');},850);impactFlash=Math.max(impactFlash,.24);tg?.HapticFeedback?.selectionChanged?.();}else if(invulnerable<=0){health--;combo=0;streak=0;invulnerable=1.5;impactFlash=1;cameraShake=.3;tg?.HapticFeedback?.impactOccurred?.('medium');if(health<=0){finish();break;}}}else if(!o.gem){streak++;combo++;score+=10*multiplier();}updateHud();}if(o.mesh.position.z>18){scene.remove(o.mesh);o.mesh.traverse(n=>{if(n.geometry)n.geometry.dispose();});objects.splice(i,1);}}}
+for(let i=0;i<waveRings.length;i++){const w=waveRings[i];w.position.z=10-(((i*30+18-tunnelDistance)%(waveRings.length*30)+(waveRings.length*30))%(waveRings.length*30));const pulse=1+beatPulse*.09;w.scale.set(pulse,pulse,1);w.material.opacity=.16+beatPulse*.55;}for(let i=0;i<starPositions.length;i+=3){starPositions[i+2]+=dt*speed*.7;if(starPositions[i+2]>12)starPositions[i+2]-=190;}starGeometry.attributes.position.needsUpdate=true;ship.position.x=THREE.MathUtils.damp(ship.position.x,desiredX,8.5,dt);ship.rotation.z=THREE.MathUtils.damp(ship.rotation.z,THREE.MathUtils.clamp(-(desiredX-ship.position.x)*.15,-.3,.3),7,dt);ship.rotation.y=THREE.MathUtils.damp(ship.rotation.y,THREE.MathUtils.clamp(-(desiredX-ship.position.x)*.12,-.25,.25),7,dt);ship.position.y=-2.1+Math.sin(elapsed*3.5)*.07;ship.position.z=1.1;shipGlow.intensity=7+Math.pow(beatPulse,3)*10;flame.scale.y=1+Math.sin(elapsed*40)*.14;invulnerable=Math.max(0,invulnerable-dt);ship.visible=invulnerable===0||Math.sin(elapsed*28)>0;for(let i=objects.length-1;i>=0;i--){const o=objects[i];o.mesh.position.z=collisionZ+(rhythmTime>=o.arrivalBeat?distanceBetween(o.arrivalBeat,rhythmTime):-distanceBetween(rhythmTime,o.arrivalBeat));if(o.gem&&!o.dancer){o.mesh.rotation.y+=dt*1.4;o.mesh.position.y=-2.05+Math.sin(rhythmTime*4+o.arrivalBeat)*.18;}if(o.gem&&o.dancer){const d=o.dancer.userData;const phase=rhythmTime*Math.PI*2/beat;const motion=phase+(d.style*1.7);d.arms[0].rotation.z=d.style===0?-1.8+Math.sin(motion)*.3:d.style===1?Math.sin(motion)*1.3-.8:-1.3+Math.sin(motion*2)*.7;d.arms[1].rotation.z=d.style===0?1.8+Math.cos(motion)*.3:d.style===1?-Math.sin(motion+1.1)*1.3+.8:1.3-Math.cos(motion*2)*.7;d.arms[0].rotation.x=Math.cos(motion)*.5;d.arms[1].rotation.x=-Math.cos(motion)*.5;d.legs[0].rotation.x=Math.sin(motion)*(d.style===2?.85:.55);d.legs[1].rotation.x=-Math.sin(motion)*(d.style===2?.85:.55);o.dancer.position.y=Math.abs(Math.sin(motion))*.22;o.dancer.rotation.y=Math.sin(motion*.5)*.24;d.torso.rotation.z=Math.sin(motion*.5)*.3;d.torso.rotation.x=Math.sin(motion)*.16;d.headPivot.rotation.y=Math.sin(motion*.75)*.48;d.hips.rotation.y=Math.sin(motion*.5)*.32;d.forearms[0].rotation.z=-.6+Math.sin(motion*1.3)*.7;d.forearms[1].rotation.z=.6-Math.cos(motion*1.3)*.7;d.shins[0].rotation.x=Math.max(0,Math.sin(motion))*.6;d.shins[1].rotation.x=Math.max(0,-Math.sin(motion))*.6;d.halo.rotation.z+=dt*.65;d.headPivot.rotation.z=Math.sin(motion*.65)*.12;for(let i=0;i<d.ribbons.length;i++){d.ribbons[i].rotation.z=Math.sin(motion*.72-i*.9)*.24;d.ribbons[i].rotation.x=Math.cos(motion*.65+i)*.19;}d.glowTrim.opacity=.65+beatPulse*.3;}else if(!o.gem&&o.mesh.children.length)o.mesh.rotation.z=Math.sin(rhythmTime*2+o.arrivalBeat)*.12;if(!o.gem&&!o.passed&&o.arrivalBeat-rhythmTime>0&&o.arrivalBeat-rhythmTime<.55&&Math.abs(o.mesh.position.x-ship.position.x)<o.r+.6)warningFlash=Math.max(warningFlash,1-(o.arrivalBeat-rhythmTime)/.55);if(!o.passed&&rhythmTime>=o.arrivalBeat){o.passed=true;if(Math.abs(o.mesh.position.x-ship.position.x)<o.r+(o.gem?1.25:.6)){if(o.gem){spawnPickupBurst(o.mesh.position.x,o.mesh.position.y,o.mesh.position.z,o.collectibleType);streak++;score+=100*multiplier();combo+=2;if(streak>0&&streak%10===0){score+=500;trackLabel('RAVE COMBO +500');}trackLabel(o.collectibleType==='whisky'?'✦ +100 ВИСКИ':o.collectibleType==='dollars'?'✦ +100 ДОЛЛАРЫ':'✦ +100 РЕЙВЕР');setTimeout(()=>{if(running)trackLabel(track.paused?'♫ ВКЛЮЧИТЬ ТРЕК':'♫ VITTY ИГРАЕТ');},850);impactFlash=Math.max(impactFlash,.24);tg?.HapticFeedback?.selectionChanged?.();}else if(invulnerable<=0){health--;combo=0;streak=0;invulnerable=1.5;impactFlash=1;cameraShake=.3;tg?.HapticFeedback?.impactOccurred?.('medium');if(health<=0){finish();break;}}}else if(!o.gem){streak++;combo++;score+=10*multiplier();}updateHud();}if(o.mesh.position.z>18){scene.remove(o.mesh);o.mesh.traverse(n=>{if(n.geometry)n.geometry.dispose();});objects.splice(i,1);}}}
 updatePickupBursts(active?dt:0);warningFlash=Math.max(0,warningFlash-dt*2.8);impactFlash=Math.max(0,impactFlash-dt*2.6);cameraShake=Math.max(0,cameraShake-dt*.85);impactLight.intensity=impactFlash*75+warningFlash*13;light.intensity=34+Math.pow(beatPulse,5)*42;camera.position.x=THREE.MathUtils.damp(camera.position.x,ship.position.x*.05,2,dt)+(Math.random()-.5)*cameraShake;camera.position.y=1.9+(Math.random()-.5)*cameraShake;if(!contextLost)renderer.render(scene,camera);}
 requestAnimationFrame(animate);
