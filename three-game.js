@@ -60,7 +60,7 @@ function updateHud(){scoreEl.textContent=String(Math.floor(score)).padStart(6,'0
 // Lightweight animated rave dancers are collectibles; obstacles remain dangerous.
 function makeDancer(index){
  const dancer=new THREE.Group();const palette=[0x20eaff,0xff43c2,0xffd451,0x9a72ff];const color=palette[Math.floor(index/5)%palette.length];
- const glow=new THREE.MeshBasicMaterial({color});const suit=new THREE.MeshStandardMaterial({color:0x132046,emissive:color,emissiveIntensity:.38,metalness:.35,roughness:.4});
+ const glow=new THREE.MeshBasicMaterial({color});const suit=new THREE.MeshBasicMaterial({color});
  const head=mesh(new THREE.SphereGeometry(.3,10,8),glow,0,1.07,0);dancer.add(head);
  dancer.add(mesh(new THREE.BoxGeometry(.5,.78,.28),suit,0,.42,0));
  dancer.add(mesh(new THREE.BoxGeometry(.55,.08,.34),glow,0,.09,0));
@@ -69,23 +69,39 @@ function makeDancer(index){
   const arm=new THREE.Group();arm.position.set(side*.34,.75,0);arm.add(mesh(new THREE.BoxGeometry(.16,.7,.17),glow,side*.07,-.32,0));dancer.add(arm);arms.push(arm);
   const leg=new THREE.Group();leg.position.set(side*.15,.06,0);leg.add(mesh(new THREE.BoxGeometry(.18,.7,.2),suit,0,-.34,0));leg.add(mesh(new THREE.BoxGeometry(.23,.12,.35),glow,0,-.67,-.07));dancer.add(leg);legs.push(leg);
  }
- const halo=mesh(new THREE.TorusGeometry(.95,.07,6,28),glow,0,.38,0);dancer.add(halo);
- dancer.userData={arms,legs,halo,style:Math.floor(index/5)%3};
+ const halo=mesh(new THREE.TorusGeometry(.95,.1,6,28),glow,0,.38,0);dancer.add(halo);
+ dancer.scale.setScalar(1.55);dancer.userData={arms,legs,halo,style:Math.floor(index/5)%3};
  return dancer;
 }
-function addObstacle(index,arrivalBeat){const patterns=[[0,2,-2,1,-1],[-2,0,2,-1,1],[2,1,0,-1,-2],[0,-2,2,-1,1]];const section=Math.floor(index/16)%patterns.length;const lane=patterns[section][index%5];const isGem=index%5===2;const group=new THREE.Group();let hitRadius=.9;let dancer=null;if(isGem){dancer=makeDancer(index);group.add(dancer);hitRadius=1.3;}else if(index%4===0){group.add(mesh(new THREE.TorusGeometry(1.08,.23,8,8),pink,0,0,0,0,0,Math.PI/8));group.add(mesh(new THREE.OctahedronGeometry(.65,0),violet));hitRadius=1.03;}else if(index%4===1){for(const x of [-.77,.77])group.add(mesh(new THREE.BoxGeometry(.24,2.65,.5),pink,x,0,0));group.add(mesh(new THREE.BoxGeometry(1.75,.24,.55),cyan,0,1.24,0));hitRadius=.98;}else if(index%4===2){group.add(mesh(new THREE.OctahedronGeometry(1.15,0),pink));group.add(mesh(new THREE.TorusGeometry(.86,.07,6,6),cyan));hitRadius=1.02;}else{group.add(mesh(new THREE.BoxGeometry(1.65,2.5,.65),pink));group.add(mesh(new THREE.BoxGeometry(1.9,.12,.85),cyan,0,1.28,0));}group.position.set(lane*2.2,-2.05,-110);scene.add(group);objects.push({mesh:group,gem:isGem,dancer,r:hitRadius,passed:false,arrivalBeat});}
+function addObstacle(index,arrivalBeat){const patterns=[[0,2,-2,1,-1],[-2,0,2,-1,1],[2,1,0,-1,-2],[0,-2,2,-1,1]];const section=Math.floor(index/16)%patterns.length;const lane=patterns[section][index%5];const isGem=index%4===1;const group=new THREE.Group();let hitRadius=.9;let dancer=null;if(isGem){dancer=makeDancer(index);group.add(dancer);group.add(mesh(new THREE.TorusGeometry(1.6,.095,6,32),gold,0,.4,0));hitRadius=1.5;}else if(index%4===0){group.add(mesh(new THREE.TorusGeometry(1.08,.23,8,8),pink,0,0,0,0,0,Math.PI/8));group.add(mesh(new THREE.OctahedronGeometry(.65,0),violet));hitRadius=1.03;}else if(index%4===1){for(const x of [-.77,.77])group.add(mesh(new THREE.BoxGeometry(.24,2.65,.5),pink,x,0,0));group.add(mesh(new THREE.BoxGeometry(1.75,.24,.55),cyan,0,1.24,0));hitRadius=.98;}else if(index%4===2){group.add(mesh(new THREE.OctahedronGeometry(1.15,0),pink));group.add(mesh(new THREE.TorusGeometry(.86,.07,6,6),cyan));hitRadius=1.02;}else{group.add(mesh(new THREE.BoxGeometry(1.65,2.5,.65),pink));group.add(mesh(new THREE.BoxGeometry(1.9,.12,.85),cyan,0,1.28,0));}group.position.set(lane*2.2,-2.05,-110);scene.add(group);objects.push({mesh:group,gem:isGem,dancer,r:hitRadius,passed:false,arrivalBeat});}
 function finish(){running=false;track.pause();runId++;document.body.classList.remove('running');let saved=0;try{saved=Number(localStorage.getItem('makar-zhenya-3d-best')||0)||0;}catch{}const best=Math.max(score,saved);try{localStorage.setItem('makar-zhenya-3d-best',String(Math.floor(best)));}catch{}message.textContent='Счёт: '+Math.floor(score)+' · Рекорд: '+Math.floor(best)+' · Попробуй ещё раз!';play.textContent='ИГРАТЬ СНОВА →';screen.style.display='flex';if(master&&audio)master.gain.setTargetAtTime(0,audio.currentTime,.035);}
-// One active pointer controls the ship. Taps choose a lane; dragging moves relative to the finger.
-let activePointer=null,dragStartX=0,dragShipX=0;
-function pointerX(e){const r=renderer.domElement.getBoundingClientRect();return (e.clientX-r.left)/Math.max(1,r.width);}
-function laneTarget(u){return THREE.MathUtils.clamp((u-.5)*8.2,-4.1,4.1);}
-function steerDown(e){if(!running||paused||contextLost||e.target!==renderer.domElement)return;if(activePointer!==null)return;activePointer=e.pointerId;dragStartX=e.clientX;dragShipX=ship.position.x;desiredX=laneTarget(pointerX(e));dragShipX=desiredX;try{renderer.domElement.setPointerCapture(e.pointerId);}catch{}e.preventDefault();}
-function steerMove(e){if(!running||paused||activePointer!==e.pointerId)return;const width=Math.max(1,renderer.domElement.getBoundingClientRect().width);const delta=e.clientX-dragStartX;const sensitivity=2.35;desiredX=THREE.MathUtils.clamp(dragShipX+delta/width*8.2*sensitivity,-4.1,4.1);e.preventDefault();}
-function steerEnd(e){if(activePointer===e.pointerId){activePointer=null;try{renderer.domElement.releasePointerCapture(e.pointerId);}catch{}}}
-renderer.domElement.addEventListener('pointerdown',steerDown,{passive:false});
-renderer.domElement.addEventListener('pointermove',steerMove,{passive:false});
-renderer.domElement.addEventListener('pointerup',steerEnd);
-renderer.domElement.addEventListener('pointercancel',steerEnd);
+// Reliable full-screen steering: short relative swipes, with tap-to-lane fallback.
+let activePointer=null,dragStartX=0,dragShipX=0,dragged=false;
+function isGameControl(target){return target instanceof Element&&!!target.closest('button,#screen');}
+function steerDown(e){
+ if(!running||paused||contextLost||isGameControl(e.target)||activePointer!==null)return;
+ activePointer=e.pointerId;dragStartX=e.clientX;dragShipX=desiredX;dragged=false;
+ try{renderer.domElement.setPointerCapture(e.pointerId);}catch{}
+ e.preventDefault();
+}
+function steerMove(e){
+ if(!running||paused||activePointer!==e.pointerId)return;
+ const delta=e.clientX-dragStartX;
+ if(Math.abs(delta)>5)dragged=true;
+ const width=Math.max(1,innerWidth);
+ desiredX=THREE.MathUtils.clamp(dragShipX+delta/width*19.5,-4.4,4.4);
+ e.preventDefault();
+}
+function steerEnd(e){
+ if(activePointer!==e.pointerId)return;
+ if(!dragged&&running&&!paused){const u=e.clientX/Math.max(1,innerWidth);desiredX=THREE.MathUtils.clamp((u-.5)*8.8,-4.4,4.4);}
+ activePointer=null;
+ try{renderer.domElement.releasePointerCapture(e.pointerId);}catch{}
+}
+window.addEventListener('pointerdown',steerDown,{capture:true,passive:false});
+window.addEventListener('pointermove',steerMove,{capture:true,passive:false});
+window.addEventListener('pointerup',steerEnd,{capture:true});
+window.addEventListener('pointercancel',steerEnd,{capture:true});
 window.addEventListener('blur',()=>{activePointer=null;});
 window.addEventListener('keydown',e=>{if(e.key==='ArrowLeft')desiredX=Math.max(-4.4,desiredX-1.1);if(e.key==='ArrowRight')desiredX=Math.min(4.4,desiredX+1.1);});
 play.addEventListener('click',()=>{if(contextLost){location.reload();return;}screen.style.display='';startGame();});mute.addEventListener('click',()=>{muted=!muted;mute.textContent=muted?'♪̸':'♫';track.muted=muted;if(trackAvailable)trackLabel(muted?'♪ ТРЕК БЕЗ ЗВУКА':'♫ VITTY ИГРАЕТ');if(master&&audio)master.gain.setTargetAtTime(muted||(trackAvailable&&!track.paused)?0:.55,audio.currentTime,.012);});
