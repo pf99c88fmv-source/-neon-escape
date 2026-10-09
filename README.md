@@ -6,7 +6,6 @@ Playable HTML5 rhythm arcade prototype for Telegram Mini Apps and mobile browser
 
 Use Python 3 and Node.js 18 or newer. No npm install is required.
 
-    cd neon-escape-v2
     npm test
     npm run serve
 
@@ -28,14 +27,16 @@ assets/audio/neon-rush-140.mp3 is an original procedural synth sketch, exported 
 
 ## Tests
 
-npm test currently passes the pure JavaScript engine checks for chart integrity, gate timing and one-time scoring, misses, multipliers, accuracy, movement boundaries, Hard risk clearances, wall collision, full laser active window and shield pickup.
+`npm test` passes 20 tests: 11 existing engine tests and 9 regressions for landscape scale, safe-area reset, reduced effects, audio transport and interruption, background loading, late resume, and result sharing. Node tests require no package installation.
 
-No Chromium/Chrome/Firefox binary is available in the implementation environment, so browser UI automation and physical iOS/Android/Telegram tests could not be run here. This is recorded as pending QA, not a passed test.
+The existing `tests/smoke.cjs` now checks the v2 interface in real headless Chromium. Run `npm run test:browser` with Playwright and Chromium installed (`npm install --no-save --package-lock=false playwright`, then `npx playwright install chromium`). It serves the game from a project subdirectory; `TEST_SSL_CERT` and `TEST_SSL_KEY` optionally enable a local HTTPS test server.
+
+Browser flow, real MP3 decoding, SDK-unavailable mode and Telegram API mocks were checked. Physical iOS/Android, real Telegram and listening/latency calibration remain pending. See [the final Russian QA report](docs/QA.md) for exact scope, fixes and commands.
 
 ## Publish after review
 
 1. Host this directory as a static site on HTTPS (GitHub Pages, Cloudflare Pages or another static host).
-2. Verify /index.html, /assets/charts/rave-140.json and /assets/audio/neon-rush-140.mp3 all load over HTTPS. Keep paths relative; GitHub Pages project subpaths are supported.
+2. Verify ./index.html, ./assets/charts/rave-140.json and ./assets/audio/neon-rush-140.mp3 all load over HTTPS. Keep paths relative; GitHub Pages project subpaths are supported.
 3. Run the game on Safari iPhone and Chrome Android, then inside Telegram on both. Test audio unlock, drag, pause/resume, safe-area, device rotation, background/return, and reduced effects.
 4. In BotFather, set the approved HTTPS URL as the bot's Mini App or menu button. The game cannot change the bot's public name; the visible page/header styling and all in-game branding already show МАКАР + ЖЕНЯ.
 5. Keep the audio and matching chart hash together. Do not publish only one side of an audio/chart update.
