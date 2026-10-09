@@ -1,8 +1,8 @@
-export const BPM=140,SPB=60/BPM,DURATION=192,SPEED=24,LANES=[-2.4,0,2.4];
-export const zones=[{name:'NEON WORMHOLE',start:0,color:0x20dcff,accent:0x883dff},{name:'TECHNO CATHEDRAL',start:48,color:0xaa65ff,accent:0xff349d},{name:'GALACTIC RAVE',start:96,color:0x3cf5c1,accent:0x268fff},{name:'HYPERSPACE DROP',start:144,color:0xff4aad,accent:0xffcb65}];
-export function zoneAt(beat){return Math.min(3,Math.floor(beat/48));}
+export const BPM=132,SPB=60/BPM,DURATION=724,SPEED=24,LANES=[-2.4,0,2.4];
+export const zones=[{name:'NEON WORMHOLE',start:0,color:0x20dcff,accent:0x883dff},{name:'TECHNO CATHEDRAL',start:181,color:0xaa65ff,accent:0xff349d},{name:'GALACTIC RAVE',start:362,color:0x3cf5c1,accent:0x268fff},{name:'HYPERSPACE DROP',start:543,color:0xff4aad,accent:0xffcb65}];
+export function zoneAt(beat){return Math.min(3,Math.max(0,Math.floor(beat/181)));}
 export function depth(arrival,beat){return -(arrival-beat)*SPB*SPEED;}
-export function course(){let a=[],i=0;const route=[1,0,1,2,1,0,0,1,2,2,1,0];for(let b=12;b<192;b+=b<112?4:2){const safe=route[i%route.length];for(let lane=0;lane<3;lane++)if(lane!==safe)a.push({id:a.length,beat:b,lane,x:LANES[lane],kind:i%3===0?'laser':i%3===1?'wall':'shard'});a.push({id:a.length,beat:b,x:LANES[safe],lane:safe,kind:i%9===8?'shield':'orb'});i++;}return a;}
+export function course(){let a=[],i=0;const route=[1,0,1,2,1,0,0,1,2,2,1,0];for(let b=12;b<DURATION;b+=b<362?4:2){const safe=route[i%route.length];for(let lane=0;lane<3;lane++)if(lane!==safe)a.push({id:a.length,beat:b,lane,x:LANES[lane],kind:i%3===0?'laser':i%3===1?'wall':'shard'});a.push({id:a.length,beat:b,x:LANES[safe],lane:safe,kind:i%9===8?'shield':'orb'});i++;}return a;}
 export class Run{
  constructor(zen=false){this.zen=zen;this.events=course();this.x=0;this.target=0;this.beat=0;this.score=0;this.combo=0;this.health=3;this.shield=false;this.invulnerable=0;this.feedback=[];this.done=false;this.perfect=0;this.dodged=0;}
  get multiplier(){return Math.min(5,1+Math.floor(this.combo/8));}
