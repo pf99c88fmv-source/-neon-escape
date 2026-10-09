@@ -70,17 +70,21 @@ export function createCosmicBackdrop(scene){
    }`
  }));scene.add(sky);
  const planetMat=new T.MeshStandardMaterial({
-  map:makePlanetMap(['#211d48','#5b518b','#a07bad']),
+  map:makePlanetMap(['#141b41','#39496c','#7b7dac']),
   metalness:.05,roughness:.9
  });
  const planet=new T.Mesh(new T.SphereGeometry(17,48,32),planetMat);
  planet.position.set(36,26,-130);scene.add(planet);
- const ringMat=new T.MeshBasicMaterial({
-  color:0xb58ee0,transparent:true,opacity:.66,depthWrite:false,side:T.DoubleSide
- });
- const ring=new T.Mesh(new T.RingGeometry(22,26,96),ringMat);
- ring.position.copy(planet.position);ring.rotation.set(.56,.14,.6);
- scene.add(ring);
+ // A genuine planet replaces the oversaturated cartoon orbit ring.
+ // Its limb is softly tinted; a separate geometric circle is deliberately
+ // omitted because it dominated the runner's view.
+ const planetAtmosphere=new T.Mesh(new T.SphereGeometry(17.65,36,24),
+  new T.MeshBasicMaterial({
+   color:0x728cd4,transparent:true,opacity:.065,
+   depthWrite:false,blending:T.AdditiveBlending,side:T.FrontSide
+  }));
+ planetAtmosphere.position.copy(planet.position);
+ scene.add(planetAtmosphere);
  const planetFar=new T.Mesh(new T.SphereGeometry(10,32,20),
   new T.MeshStandardMaterial({
    map:makePlanetMap(['#0b263d','#1a5b73','#3b98a0']),roughness:.94
@@ -108,7 +112,6 @@ export function createCosmicBackdrop(scene){
    sky.material.uniforms.uTime.value=beat*60/132;
    planet.rotation.y+=Math.min(dt,.05)*.004;
    planetFar.rotation.y-=Math.min(dt,.05)*.007;
-   ring.rotation.z+=Math.min(dt,.05)*.003;
   }
  };
 }
