@@ -125,10 +125,10 @@ function spotlightPod(kind,label,dollar){
 export class RaveShow{
  constructor(scene){
   this.scene=scene;this.dancers=[];this.pods=[];this.ready=false;this.minimal=false;
-  const whiskyLabel=canvasTexture('whisky');
-  const banknote=canvasTexture('dollar');
+  this.pendingPickupDancers=new Set();this.activePickupDancers=new Set();this.dancerAsset=null;
+  this.whiskyLabel=canvasTexture('whisky');this.banknoteTexture=canvasTexture('dollar');
   for(const spec of PROP_SLOTS){
-   const group=spotlightPod(spec.kind,whiskyLabel,banknote);
+   const group=spotlightPod(spec.kind,this.whiskyLabel,this.banknoteTexture);
    scene.add(group);this.pods.push({...spec,group});
   }
   // GLB is an optional independent decoration: network failure must never
@@ -138,6 +138,7 @@ export class RaveShow{
  async loadDancers(){
   try{
    const gltf=await new GLTFLoader().loadAsync(FESTIVAL_DANCER_URL);
+   this.dancerAsset=gltf;
    const clip=gltf.animations.find(c=>/samba|dance/i.test(c.name))||gltf.animations[0];
    if(!clip)throw Error('The sample has no dance animation');
    for(const spec of DANCER_SLOTS){
@@ -174,11 +175,111 @@ export class RaveShow{
     this.dancers.push({...spec,stage,person,mixer,action});
    }
    this.ready=true;
+   for(const pickup of [...this.pendingPickupDancers])this.activateDancerPickup(pickup);
+   this.pendingPickupDancers.clear();
   }catch(error){
    // A missing third-party character resource must not crash gameplay.
    this.failed=true;
    console.warn('Rave dancer GLB unavailable; continuing without optional NPCs:',error);
   }
+ }
+ // The user-facing collectible has its own 3D geometry and reward. The
+ // separate scenery pods remain purely decorative and never score points.
+ makePickup(kind){
+  const group=new T.Group();
+  group.userData.kind=kind;
+  const highlight=kind==='dancer'?0xff5ecc:kind==='cash'?0x5bfca7:0xffc56b;
+  const base=part(group,new T.CylinderGeometry(.89,.96,.13,24),
+   new T.MeshStandardMaterial({color:0x11192c,metalness:.75,roughness:.28}),0,.11,0);
+  const aura=part(group,new T.TorusGeometry(.9,.052,7,28),
+   new T.MeshBasicMaterial({color:highlight}),0,.2,0);
+  aura.rotation.x=Math.PI/2;
+  if(kind==='bottle'){
+   const item=bottle(this.whiskyLabel);
+   item.scale.setScalar(.82);
+   item.position.y=.2;
+   group.add(item);
+  }else if(kind==='cash'){
+   const item=dollarRoll(this.banknoteTexture);
+   item.scale.setScalar(1.25);
+   item.position.y=.34;
+   group.add(item);
+  }else if(kind==='dancer'){
+   // The clear costume-shaped fallback is shown only until the skinned GLB
+   // loads; once available this is replaced with real skeletal animation.
+   const placeholder=this.dancerPlaceholder();
+   group.add(placeholder);
+   group.userData.placeholder=placeholder;
+   if(this.dancerAsset)this.activateDancerPickup(group);
+   else this.pendingPickupDancers.add(group);
+  }
+  return group;
+ }
+ dancerPlaceholder(){
+  const canvas=document.createElement('canvas');
+  canvas.width=256;canvas.height=384;
+  const c=canvas.getContext('2d');
+  if(c){
+   const grad=c.createLinearGradient(0,0,256,384);
+   grad.addColorStop(0,'#ff67be');grad.addColorStop(1,'#722eff');
+   c.fillStyle=grad;
+   c.shadowColor='#f68dff';c.shadowBlur=28;
+   c.beginPath();c.arc(128,53,27,0,Math.PI*2);c.fill();
+   c.beginPath();
+   c.moveTo(111,83);c.lineTo(145,83);c.lineTo(164,172);c.lineTo(151,227);
+   c.lineTo(166,331);c.lineTo(145,355);c.lineTo(120,235);
+   c.lineTo(105,355);c.lineTo(79,348);c.lineTo(104,216);c.lineTo(91,174);
+   c.closePath();c.fill();
+   c.lineWidth=18;c.lineCap='round';
+   c.beginPath();c.moveTo(111,102);c.lineTo(60,153);c.lineTo(47,114);
+   c.moveTo(146,105);c.lineTo(200,67);c.lineTo(216,115);c.stroke();
+   c.shadowBlur=0;
+   c.fillStyle='#32edff';c.fillRect(108,124,46,6);
+  }
+  const tex=new T.CanvasTexture(canvas);tex.colorSpace=T.SRGBColorSpace;
+  const sprite=new T.Sprite(new T.SpriteMaterial({map:tex,transparent:true,depthWrite:false}));
+  sprite.position.set(0,1.46,0);sprite.scale.set(1.63,2.48,1);
+  return sprite;
+ }
+ activateDancerPickup(group){
+  if(!this.dancerAsset||!group||group.userData.disposed)return;
+  try{
+   const asset=this.dancerAsset,clip=asset.animations.find(a=>/samba|dance/i.test(a.name))||asset.animations[0];
+   if(!clip)return;
+   const person=cloneSkinned(asset.scene);
+   const mixer=new T.AnimationMixer(person);
+   const action=mixer.clipAction(clip);action.play();mixer.update(.03);
+   person.updateMatrixWorld(true);
+   const bbox=new T.Box3().setFromObject(person);
+   const height=Math.max(.001,bbox.max.y-bbox.min.y);
+   const scale=2.23/height;
+   person.scale.setScalar(scale);
+   person.position.set(
+    -(bbox.min.x+bbox.max.x)*.5*scale,
+    .24-bbox.min.y*scale,
+    -(bbox.min.z+bbox.max.z)*.5*scale
+   );
+   person.traverse(o=>{if(o.isMesh)o.frustumCulled=false;});
+   if(group.userData.placeholder){
+    const sprite=group.userData.placeholder;
+    group.remove(sprite);
+    sprite.material.map?.dispose();
+    sprite.material.dispose();
+    group.userData.placeholder=null;
+   }
+   group.add(person);
+   group.userData.dancerMixer=mixer;
+   group.userData.dancerAction=action;
+   this.activePickupDancers.add(group);
+  }catch(e){console.warn('Optional collectible dancer skin failed',e);}
+ }
+ releasePickup(group){
+  if(!group)return;
+  const pickup=group.userData?.specialModel||group;
+  pickup.userData.disposed=true;
+  this.pendingPickupDancers.delete(pickup);
+  this.activePickupDancers.delete(pickup);
+  pickup.userData.dancerAction?.stop();
  }
  setQuality(preset){
   this.minimal=preset==='low';
@@ -186,6 +287,9 @@ export class RaveShow{
   for(const p of this.pods)p.group.visible=!this.minimal||p.slot%2===0;
  }
  update(beat,dt,travel){
+  for(const obj of this.activePickupDancers){
+   if(!obj.userData.disposed)obj.userData.dancerMixer.update(Math.min(Math.max(dt,0),.05));
+  }
   const pulse=Math.exp(-(beat%1)*9);
   for(const pod of this.pods){
    pod.group.position.set(pod.side*PROP_X,.14,displayZ(pod.slot,travel,6.0));
