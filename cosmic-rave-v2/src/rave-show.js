@@ -1,7 +1,7 @@
 import * as T from 'three';
 import {GLTFLoader} from 'three/addons/loaders/GLTFLoader.js';
 import {clone as cloneSkinned} from 'three/addons/utils/SkeletonUtils.js';
-import {frameZ} from './tunnel-layout.js';
+import {PROP_X,DANCER_X,PROP_SLOTS,DANCER_SLOTS,displayZ} from './premium-layout.js';
 
 const FESTIVAL_DANCER_URL='https://raw.githubusercontent.com/mrdoob/three.js/dev/examples/models/gltf/Michelle.glb';
 const v=(x,y,z)=>new T.Vector3(x,y,z);
@@ -127,9 +127,7 @@ export class RaveShow{
   this.scene=scene;this.dancers=[];this.pods=[];this.ready=false;
   const whiskyLabel=canvasTexture('whisky');
   const banknote=canvasTexture('dollar');
-  const podSlots=[{side:-1,slot:2,kind:'bottle'},{side:1,slot:8,kind:'cash'},
-   {side:1,slot:12,kind:'bottle'},{side:-1,slot:17,kind:'cash'}];
-  for(const spec of podSlots){
+  for(const spec of PROP_SLOTS){
    const group=spotlightPod(spec.kind,whiskyLabel,banknote);
    scene.add(group);this.pods.push({...spec,group});
   }
@@ -142,8 +140,7 @@ export class RaveShow{
    const gltf=await new GLTFLoader().loadAsync(FESTIVAL_DANCER_URL);
    const clip=gltf.animations.find(c=>/samba|dance/i.test(c.name))||gltf.animations[0];
    if(!clip)throw Error('The sample has no dance animation');
-   const locations=[{side:-1,slot:5},{side:1,slot:14}];
-   for(const spec of locations){
+   for(const spec of DANCER_SLOTS){
     const stage=pedestal(spec.side<0?0xff55c2:0x38f8f3);
     this.scene.add(stage);
     const person=cloneSkinned(gltf.scene);
@@ -185,13 +182,13 @@ export class RaveShow{
  update(beat,dt,travel){
   const pulse=Math.exp(-(beat%1)*9);
   for(const pod of this.pods){
-   pod.group.position.set(pod.side*6.85,.14,frameZ(pod.slot,travel)-6.0);
+   pod.group.position.set(pod.side*PROP_X,.14,displayZ(pod.slot,travel,6.0));
    pod.group.rotation.y=Math.sin(beat*.08+pod.slot)*.08;
    pod.group.userData.animated.rotation.y+=Math.min(dt,.05)*.30;
    pod.group.scale.setScalar(1+pulse*.012);
   }
   for(const d of this.dancers){
-   d.stage.position.set(d.side*6.75,.12,frameZ(d.slot,travel)-5.2);
+   d.stage.position.set(d.side*DANCER_X,.12,displayZ(d.slot,travel,5.2));
    d.mixer.update(Math.min(dt,.05));
    d.action.timeScale=1.0;
    d.stage.rotation.y=Math.sin(beat*.075+d.slot)*.07;
