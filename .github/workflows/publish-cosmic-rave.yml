@@ -1,0 +1,41 @@
+name: Publish Cosmic Rave Mini App
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/publish-cosmic-rave.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+concurrency:
+  group: pages
+  cancel-in-progress: true
+jobs:
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout independent game version
+        uses: actions/checkout@v4
+        with:
+          ref: feature/cosmic-rave-v2-collectibles-polish
+      - name: Prepare published site
+        run: |
+          mkdir -p _site
+          cp -a cosmic-rave-v2/. _site/
+          touch _site/.nojekyll
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
+        with:
+          enablement: true
+      - name: Upload site
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+      - name: Deploy site
+        id: deployment
+        uses: actions/deploy-pages@v4
