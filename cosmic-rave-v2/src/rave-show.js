@@ -5,7 +5,7 @@ import {PROP_X,DANCER_X,PROP_SLOTS,DANCER_SLOTS,displayZ} from './premium-layout
 import {
  BOTTLE_TYPES,bottleTypeForEvent,makeBottleLabelTexture,makePremiumBottle,
  makeBanknoteTexture,makeRolledBanknote,styleNightclubDancer
-} from './club-collectibles.js';
+} from './club-collectibles.js?v=arcade-finish-1';
 
 const FESTIVAL_DANCER_URL='https://raw.githubusercontent.com/mrdoob/three.js/dev/examples/models/gltf/Michelle.glb';
 function part(group,geometry,material,x=0,y=0,z=0){
