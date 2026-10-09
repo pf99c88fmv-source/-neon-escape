@@ -36,7 +36,7 @@ function frame(now){requestAnimationFrame(frame);const dt=Math.min(.05,last?(now
  if(state==='countdown'){const remain=audio.remainingCountIn();if(remain>0)toast(String(Math.ceil(remain/SPB)),.2);else{state='running';toast('ПОЙМАЙ РИТМ');}}
  if(state==='running'){beat=audio.beat();run.update(beat,dt);for(const f of run.feedback.splice(0)){audio.sound(f.type);world.burst(f.x,f.type==='hit',f.type);if(f.type==='hit'){hit=true;toast('ДЕРЖИ РИТМ');}
    else if(f.type==='dancer')toast('RAVE GIRL +300');
-   else if(f.type==='bottle')toast('WHISKY +200');
+   else if(f.type==='bottle')toast('BOTTLE +200');
    else if(f.type==='cash')toast('DOLLAR ROLL +250');
    else if(f.type==='shield')toast('ЩИТ');
    else if(run.combo%8===0)toast('RAVE COMBO ×'+run.multiplier);try{tg?.HapticFeedback?.impactOccurred?.(f.type==='hit'?'medium':'light');}catch{}}
