@@ -82,6 +82,7 @@ export class TunnelArchitecture{
    vault:smoothVault,
    inVault:innerVault
   };
+  this.zoneColors=[0x247ca8,0x6c47a9,0x249c9a,0x9e4f90].map(c=>new T.Color(c));
   this.parts=[];
   this.frames=Array.from({length:FRAME_COUNT},()=>new T.Matrix4());
   this.work=new T.Matrix4();this.spin=new T.Matrix4();
@@ -208,10 +209,9 @@ export class TunnelArchitecture{
   const pulse=Math.exp(-(beat%1)*8);
   // Smoothly blend reflective-floor and panoramic-panel colors by music
   // section, independently from the UI and gameplay objects.
-  const palette=[0x247ca8,0x6c47a9,0x249c9a,0x9e4f90];
   const idx=beat<181?0:beat<362?1:beat<543?2:3;
-  this.materials.floor.uniforms.uTint.value.lerp(new T.Color(palette[idx]),.025);
-  this.materials.holo.uniforms.uTint.value.lerp(new T.Color(palette[idx]),.018);
+  this.materials.floor.uniforms.uTint.value.lerp(this.zoneColors[idx],.025);
+  this.materials.holo.uniforms.uTint.value.lerp(this.zoneColors[idx],.018);
   this.materials.floor.uniforms.uTime.value=beat;
   this.materials.floor.uniforms.uPulse.value=reduced?pulse*.45:pulse;
   this.materials.holo.uniforms.uTime.value=beat*.45;
