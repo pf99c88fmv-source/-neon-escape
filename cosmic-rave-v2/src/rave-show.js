@@ -224,29 +224,64 @@ export class RaveShow{
   return group;
  }
  dancerPlaceholder(){
+  // Drawn fallback is deliberately a recognizable adult club performer,
+  // never a black placeholder, if the optional GLB download is blocked.
   const canvas=document.createElement('canvas');
-  canvas.width=256;canvas.height=384;
-  const c=canvas.getContext('2d');
-  if(c){
-   const grad=c.createLinearGradient(0,0,256,384);
-   grad.addColorStop(0,'#ff67be');grad.addColorStop(1,'#722eff');
-   c.fillStyle=grad;
-   c.shadowColor='#f68dff';c.shadowBlur=28;
-   c.beginPath();c.arc(128,53,27,0,Math.PI*2);c.fill();
-   c.beginPath();
-   c.moveTo(111,83);c.lineTo(145,83);c.lineTo(164,172);c.lineTo(151,227);
-   c.lineTo(166,331);c.lineTo(145,355);c.lineTo(120,235);
-   c.lineTo(105,355);c.lineTo(79,348);c.lineTo(104,216);c.lineTo(91,174);
-   c.closePath();c.fill();
-   c.lineWidth=18;c.lineCap='round';
-   c.beginPath();c.moveTo(111,102);c.lineTo(60,153);c.lineTo(47,114);
-   c.moveTo(146,105);c.lineTo(200,67);c.lineTo(216,115);c.stroke();
-   c.shadowBlur=0;
-   c.fillStyle='#32edff';c.fillRect(108,124,46,6);
+  canvas.width=384;canvas.height=576;
+  const g=canvas.getContext('2d');
+  if(g){
+   const skin='#f2c4aa',hair='#edbb72',dress='#db248e',trim='#4ff7ff';
+   g.save();g.lineCap='round';g.lineJoin='round';
+   g.shadowColor='#fb58b8';g.shadowBlur=24;
+   // Hair behind both shoulders, extending below her stage bodice.
+   g.fillStyle=hair;g.beginPath();
+   g.moveTo(158,102);g.bezierCurveTo(112,101,106,144,109,221);
+   g.bezierCurveTo(100,266,96,283,112,296);
+   g.bezierCurveTo(137,283,142,262,165,247);
+   g.lineTo(215,247);g.bezierCurveTo(253,282,271,293,277,281);
+   g.bezierCurveTo(268,235,285,160,251,111);
+   g.closePath();g.fill();
+   // Long dancing legs and ankle boots.
+   g.strokeStyle=skin;g.lineWidth=29;g.beginPath();
+   g.moveTo(169,304);g.lineTo(153,385);g.lineTo(126,447);
+   g.moveTo(216,304);g.lineTo(244,388);g.lineTo(255,448);g.stroke();
+   g.strokeStyle='#291238';g.lineWidth=35;g.beginPath();
+   g.moveTo(126,423);g.lineTo(116,484);
+   g.moveTo(256,423);g.lineTo(270,484);g.stroke();
+   g.strokeStyle=trim;g.lineWidth=7;g.beginPath();
+   g.moveTo(112,461);g.lineTo(130,460);
+   g.moveTo(256,459);g.lineTo(272,458);g.stroke();
+   // Raised stage arms and exposed shoulders.
+   g.strokeStyle=skin;g.lineWidth=26;g.beginPath();
+   g.moveTo(155,174);g.lineTo(102,212);g.lineTo(64,146);
+   g.moveTo(231,174);g.lineTo(288,139);g.lineTo(308,93);g.stroke();
+   // Pink club bodysuit with stylized corset waist and reflective seams.
+   g.fillStyle=dress;g.beginPath();
+   g.moveTo(159,173);g.quadraticCurveTo(192,189,226,173);
+   g.lineTo(240,228);g.lineTo(222,295);g.lineTo(158,295);
+   g.lineTo(143,228);g.closePath();g.fill();
+   g.fillStyle='#87206c';g.fillRect(162,281,59,22);
+   g.strokeStyle=trim;g.lineWidth=6;g.beginPath();
+   g.moveTo(156,198);g.lineTo(191,219);g.lineTo(227,198);
+   g.moveTo(164,258);g.lineTo(220,258);g.stroke();
+   // Fair-skinned face with shaded jaw and bright features.
+   g.fillStyle=skin;g.beginPath();g.ellipse(193,130,42,55,-.03,0,Math.PI*2);g.fill();
+   g.fillStyle='#efbd93';g.beginPath();g.ellipse(193,175,15,13,0,0,Math.PI*2);g.fill();
+   g.fillStyle=hair;g.beginPath();
+   g.moveTo(150,128);g.bezierCurveTo(143,65,236,44,251,111);
+   g.bezierCurveTo(228,109,221,78,213,75);
+   g.bezierCurveTo(209,111,184,95,150,128);g.fill();
+   g.shadowBlur=0;
+   g.fillStyle='#242842';g.beginPath();g.arc(177,129,4.5,0,Math.PI*2);
+   g.arc(211,129,4.5,0,Math.PI*2);g.fill();
+   g.fillStyle='#e45086';g.fillRect(184,156,19,4);
+   g.strokeStyle='#f4d6f1';g.lineWidth=4;g.beginPath();g.moveTo(163,179);g.lineTo(158,200);
+   g.moveTo(223,179);g.lineTo(232,199);g.stroke();
+   g.restore();
   }
   const tex=new T.CanvasTexture(canvas);tex.colorSpace=T.SRGBColorSpace;
   const sprite=new T.Sprite(new T.SpriteMaterial({map:tex,transparent:true,depthWrite:false}));
-  sprite.position.set(0,1.46,0);sprite.scale.set(1.63,2.48,1);
+  sprite.position.set(0,1.51,0);sprite.scale.set(2.0,2.93,1);
   return sprite;
  }
  activateDancerPickup(group){
