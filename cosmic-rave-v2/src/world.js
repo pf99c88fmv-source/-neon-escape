@@ -26,7 +26,7 @@ export class World{
  this.composer.addPass(this.fxaa);
  this.composer.addPass(new OutputPass());this.quality('auto');this.resize();addEventListener('resize',()=>this.resize());
  }
- quality(q){this.preset=q;this.dpr=q==='low'?1:q==='ultra'?Math.min(devicePixelRatio,2):Math.min(devicePixelRatio,1.4);this.bloom.enabled=q!=='low';this.fxaa.enabled=q!=='low';this.renderer.setPixelRatio(this.dpr);this.composer.setPixelRatio(this.dpr);this.resize();}
+ quality(q){this.preset=q;this.dpr=q==='low'?1:q==='ultra'?Math.min(devicePixelRatio,2):Math.min(devicePixelRatio,1.4);this.bloom.enabled=q!=='low';this.fxaa.enabled=q!=='low';this.show.setQuality(q);this.renderer.setPixelRatio(this.dpr);this.composer.setPixelRatio(this.dpr);this.resize();}
  resize(){this.renderer.setSize(innerWidth,innerHeight);this.composer.setSize(innerWidth,innerHeight);this.camera.aspect=innerWidth/innerHeight;this.camera.updateProjectionMatrix();
  if(this.fxaa)this.fxaa.material.uniforms.resolution.value.set(
   1/(Math.max(1,innerWidth)*this.dpr),1/(Math.max(1,innerHeight)*this.dpr)
