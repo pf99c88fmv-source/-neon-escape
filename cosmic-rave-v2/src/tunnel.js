@@ -24,7 +24,7 @@ export class TunnelArchitecture{
    holo:new T.ShaderMaterial({
     uniforms:{uTime:{value:0},uPulse:{value:0},uTint:{value:new T.Color(0x31b8f2)}},
     transparent:true,depthWrite:false,side:T.DoubleSide,blending:T.AdditiveBlending,
-    vertexShader:`varying vec2 vUv;void main(){vUv=uv;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}`,
+    vertexShader:`varying vec2 vUv;void main(){vUv=uv;vec4 p=vec4(position,1.);\n#ifdef USE_INSTANCING\np=instanceMatrix*p;\n#endif\ngl_Position=projectionMatrix*modelViewMatrix*p;}`,
     fragmentShader:`precision mediump float;varying vec2 vUv;uniform float uTime,uPulse;uniform vec3 uTint;
      void main(){
       float feather=smoothstep(.02,.14,vUv.x)*(1.-smoothstep(.86,.98,vUv.x));
