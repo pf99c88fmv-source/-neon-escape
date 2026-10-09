@@ -4,8 +4,8 @@ export function zoneAt(beat){return Math.min(3,Math.max(0,Math.floor(beat/181)))
 export function depth(arrival,beat){return -(arrival-beat)*SPB*SPEED;}
 export const SPECIAL_POINTS=Object.freeze({dancer:300,bottle:200,cash:250});
 export const SPECIAL_NAMES=Object.freeze({dancer:'RAVE GIRL',bottle:'WHISKY',cash:'DOLLAR ROLL'});
-export function isPickup(kind){return kind==='orb'||kind==='shield'||Object.hasOwn(SPECIAL_POINTS,kind);}
-export function pickupPoints(kind,multiplier=1){return SPECIAL_POINTS[kind]??100*multiplier;}
+export function isPickup(kind){return Object.hasOwn(SPECIAL_POINTS,kind);}
+export function pickupPoints(kind,multiplier=1){return SPECIAL_POINTS[kind]??0;}
 // Special collectibles replace existing safe-lane orbs; they never create
 // an additional obstacle and never block the only traversable lane.
 export function course(){
@@ -20,10 +20,9 @@ export function course(){
     kind:i%3===0?'laser':i%3===1?'wall':'shard'
    });
   }
-  // Every eighth opportunity is a collectible, alternating the three
-  // visual categories; a shield retains its own periodic reward.
-  const kind=i%8===3?variants[Math.floor(i/8)%variants.length]:
-   i%9===8?'shield':'orb';
+  // Every reward is now a clearly identifiable club collectible, with no
+  // legacy glowing spheres or old shield pickups on the track.
+  const kind=variants[i%variants.length];
   events.push({id:events.length,beat,x:LANES[safe],lane:safe,kind});
   i++;
  }
