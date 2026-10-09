@@ -2,9 +2,9 @@
 export function styleRaverMaterial(source,T){
  if(!source?.isMeshStandardMaterial)return source;
  const material=source.clone();
- material.roughness=.47;material.metalness=.2;
+ material.roughness=.61;material.metalness=.11;
  material.emissive=new T.Color(0x070b16);
- material.emissiveIntensity=.35;
+ material.emissiveIntensity=.21;
  const oldCompile=material.onBeforeCompile;
  material.onBeforeCompile=shader=>{
   if(typeof oldCompile==='function')oldCompile(shader);
@@ -24,9 +24,9 @@ export function styleRaverMaterial(source,T){
     float trousers=smoothstep(.20,.29,y)*(1.-smoothstep(.93,1.02,y))
        *(1.-smoothstep(.48,.60,x));
     float shoes=(1.-smoothstep(.17,.28,y))*(1.-smoothstep(.55,.69,x));
-    diffuseColor.rgb=mix(diffuseColor.rgb,vec3(.025,.029,.047),trousers*.98);
-    diffuseColor.rgb=mix(diffuseColor.rgb,vec3(.011,.015,.026),clamp(jacket+sleeves,0.,1.)*.98);
-    diffuseColor.rgb=mix(diffuseColor.rgb,vec3(.013,.019,.028),shoes*.98);
+    diffuseColor.rgb=mix(diffuseColor.rgb,vec3(.021,.023,.035),trousers*.98);
+    diffuseColor.rgb=mix(diffuseColor.rgb,vec3(.012,.014,.022),clamp(jacket+sleeves,0.,1.)*.98);
+    diffuseColor.rgb=mix(diffuseColor.rgb,vec3(.016,.019,.026),shoes*.98);
     // Rear/forward readable chevrons, asymmetrical jacket piping and shoe trim.
     float chest=smoothstep(.98,1.07,y)*(1.-smoothstep(1.33,1.40,y))
        *(1.-smoothstep(.42,.53,x));
@@ -34,17 +34,17 @@ export function styleRaverMaterial(source,T){
     float piping=1.-smoothstep(.013,.040,abs(x-.28));
     float armBand=1.-smoothstep(.018,.040,abs(y-(1.22+.1*x)));
     float shoeEdge=1.-smoothstep(.015,.040,abs(y-.067));
-    float cyan=clamp(chest*chevron+jacket*piping*.66+
-       sleeves*armBand*.5+shoes*shoeEdge*.72,0.,1.);
+    float cyan=clamp(chest*chevron*.67+jacket*piping*.45+
+       sleeves*armBand*.33+shoes*shoeEdge*.52,0.,1.);
     float pink=trousers*(1.-smoothstep(.012,.042,abs(x-.35)))*.4;
-    vec3 cyanColor=vec3(.025,.82,1.);
-    vec3 pinkColor=vec3(.93,.22,.52);
-    diffuseColor.rgb=mix(diffuseColor.rgb,cyanColor,cyan);
+    vec3 cyanColor=vec3(.04,.72,.87);
+    vec3 pinkColor=vec3(.77,.18,.39);
+    diffuseColor.rgb=mix(diffuseColor.rgb,cyanColor,cyan*.68);
     diffuseColor.rgb=mix(diffuseColor.rgb,pinkColor,pink);
-    totalEmissiveRadiance+=cyanColor*cyan*.62+pinkColor*pink*.37;
+    totalEmissiveRadiance+=cyanColor*cyan*.22+pinkColor*pink*.14;
 `);
  };
- material.customProgramCacheKey=()=> 'cosmic-rave-techwear-2';
+ material.customProgramCacheKey=()=> 'cosmic-rave-techwear-3-matte';
  material.needsUpdate=true;
  return material;
 }
