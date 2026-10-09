@@ -1,4 +1,4 @@
-import {World} from './world.js?v=stage2-arcade-1';import {Character} from './character.js?v=premium-outfit-1';import {Input} from './input.js';import {AudioEngine} from './audio.js?v=vitty132-1';import {Run,SPB,DURATION,zones,zoneAt} from './course.js';import {read,save} from './save.js';
+import {World} from './world.js?v=arcade-finish-1';import {Character} from './character.js?v=premium-outfit-1';import {Input} from './input.js';import {AudioEngine} from './audio.js?v=vitty132-1';import {Run,SPB,DURATION,zones,zoneAt} from './course.js';import {read,save} from './save.js';
 const $=s=>document.querySelector(s),world=new World($('#scene')),hero=new Character(world.scene),audio=new AudioEngine();let state='loading',run=new Run(),last=0,menuBeat=0,generation=0,toastUntil=0,frames=[],autoTime=0,audioRecoveryPending=false,silenceSince=0,lastSilentAlert=0;
 const prefs={quality:'auto',control:'lanes',reduced:true,volume:.8,distance:8.3,zen:false,...read().settings};
 const input=new Input($('#scene'),x=>run.target=x,()=>pause());
