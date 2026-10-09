@@ -268,18 +268,35 @@ export class RaveShow{
     group.userData.placeholder=null;
    }
    group.add(person);
+   group.userData.dancerPerson=person;
    group.userData.dancerMixer=mixer;
    group.userData.dancerAction=action;
    this.activePickupDancers.add(group);
   }catch(e){console.warn('Optional collectible dancer skin failed',e);}
  }
  releasePickup(group){
-  if(!group)return;
-  const pickup=group.userData?.specialModel||group;
+  if(!group||!group.userData?.specialModel)return;
+  const pickup=group.userData.specialModel;
+  if(pickup.userData.disposed)return;
   pickup.userData.disposed=true;
   this.pendingPickupDancers.delete(pickup);
   this.activePickupDancers.delete(pickup);
   pickup.userData.dancerAction?.stop();
+  const sharedSkinMeshes=new Set();
+  pickup.userData.dancerPerson?.traverse(o=>{if(o.isMesh)sharedSkinMeshes.add(o);});
+  // Only dispose our procedural geometry/materials. GLB meshes share
+  // resources with the decorative performers and must remain intact.
+  pickup.traverse(o=>{
+   if(sharedSkinMeshes.has(o))return;
+   if(o.isSprite){
+    o.material?.map?.dispose();
+    o.material?.dispose();
+   }else if(o.isMesh){
+    o.geometry?.dispose();
+    if(Array.isArray(o.material))o.material.forEach(m=>m.dispose());
+    else o.material?.dispose();
+   }
+  });
  }
  setQuality(preset){
   this.minimal=preset==='low';
