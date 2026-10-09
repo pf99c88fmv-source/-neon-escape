@@ -3,7 +3,7 @@ export const zones=[{name:'NEON WORMHOLE',start:0,color:0x20dcff,accent:0x883dff
 export function zoneAt(beat){return Math.min(3,Math.max(0,Math.floor(beat/181)));}
 export function depth(arrival,beat){return -(arrival-beat)*SPB*SPEED;}
 export const SPECIAL_POINTS=Object.freeze({dancer:300,bottle:200,cash:250});
-export const SPECIAL_NAMES=Object.freeze({dancer:'RAVE GIRL',bottle:'WHISKY',cash:'DOLLAR ROLL'});
+export const SPECIAL_NAMES=Object.freeze({dancer:'RAVE GIRL',bottle:'BOTTLE',cash:'DOLLAR ROLL'});
 export function isPickup(kind){return Object.hasOwn(SPECIAL_POINTS,kind);}
 export function pickupPoints(kind,multiplier=1){return SPECIAL_POINTS[kind]??0;}
 // Special collectibles replace existing safe-lane orbs; they never create
