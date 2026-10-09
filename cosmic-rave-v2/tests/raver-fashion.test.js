@@ -20,7 +20,7 @@ test('festival techwear patches shader while preserving original material',()=>{
  };
  styled.onBeforeCompile(shader);
  assert.match(shader.vertexShader,/vRavePosition=position/);
- assert.match(shader.fragmentShader,/charcoal techwear/);
+ assert.match(shader.fragmentShader,/Recolor the original blue superhero suit/);
  assert.match(shader.fragmentShader,/totalEmissiveRadiance/);
  assert.match(shader.fragmentShader,/shoes/);
 });
