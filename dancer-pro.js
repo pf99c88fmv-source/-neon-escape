@@ -10,9 +10,20 @@ let dancer,mixer,action,rotating=true;const clock=new THREE.Clock(),status=docum
 document.querySelector('#turn').onclick=()=>{rotating=!rotating;};
 document.querySelector('#restart').onclick=()=>{if(action){action.reset();action.play();}};
 new GLTFLoader().load('https://raw.githubusercontent.com/mrdoob/three.js/dev/examples/models/gltf/Michelle.glb',gltf=>{
-dancer=gltf.scene;const box=new THREE.Box3().setFromObject(dancer),size=box.getSize(new THREE.Vector3()),center=box.getCenter(new THREE.Vector3()),scale=2.8/Math.max(size.y,.001);
-dancer.scale.setScalar(scale);dancer.position.set(-center.x*scale,-box.min.y*scale,-center.z*scale);scene.add(dancer);
-if(gltf.animations.length){mixer=new THREE.AnimationMixer(dancer);action=mixer.clipAction(gltf.animations.find(x=>/dance|samba/i.test(x.name))||gltf.animations[0]);action.play();}
+// Animation can change the bind-pose bounds drastically; frame the actual animated pose.
+dancer=new THREE.Group();const character=gltf.scene;dancer.add(character);scene.add(dancer);
+if(gltf.animations.length){mixer=new THREE.AnimationMixer(character);action=mixer.clipAction(gltf.animations.find(x=>/dance|samba/i.test(x.name))||gltf.animations[0]);action.play();mixer.update(.001);}
+const rawBox=new THREE.Box3().setFromObject(character);
+const rawSize=rawBox.getSize(new THREE.Vector3()),rawCenter=rawBox.getCenter(new THREE.Vector3());
+const scale=2.5/Math.max(rawSize.y,.001);
+character.scale.setScalar(scale);
+character.position.set(-rawCenter.x*scale,-rawBox.min.y*scale,-rawCenter.z*scale);
+camera.position.set(0,1.4,9.5);camera.lookAt(0,1.35,0);
+// The character stays within the visible vertical safe area, even in portrait mode.
+const vFov=THREE.MathUtils.degToRad(camera.fov);
+const requiredDistance=(3.3/2)/Math.tan(vFov/2);
+camera.position.z=Math.max(8,requiredDistance+2.5);
+
 status.textContent='Готовая GLB-модель · '+gltf.animations.length+' анимаций';
 },undefined,err=>{console.error(err);status.textContent='Ошибка загрузки GLB — проверь соединение';});
 function frame(){requestAnimationFrame(frame);const dt=Math.min(.05,clock.getDelta());if(mixer)mixer.update(dt);if(dancer&&rotating)dancer.rotation.y+=dt*.25;renderer.render(scene,camera);}frame();
