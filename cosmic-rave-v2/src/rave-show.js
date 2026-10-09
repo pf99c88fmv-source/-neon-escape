@@ -2,6 +2,10 @@ import * as T from 'three';
 import {GLTFLoader} from 'three/addons/loaders/GLTFLoader.js';
 import {clone as cloneSkinned} from 'three/addons/utils/SkeletonUtils.js';
 import {PROP_X,DANCER_X,PROP_SLOTS,DANCER_SLOTS,displayZ} from './premium-layout.js';
+import {
+ BOTTLE_TYPES,bottleTypeForEvent,makeBottleLabelTexture,makePremiumBottle,
+ makeBanknoteTexture,makeRolledBanknote,styleNightclubDancer
+} from './club-collectibles.js';
 
 const FESTIVAL_DANCER_URL='https://raw.githubusercontent.com/mrdoob/three.js/dev/examples/models/gltf/Michelle.glb';
 const v=(x,y,z)=>new T.Vector3(x,y,z);
@@ -110,15 +114,16 @@ function dollarRoll(texture){
  g.position.y=1.03;
  return g;
 }
-function spotlightPod(kind,label,dollar){
+function spotlightPod(kind,labels,dollar,seed=0){
  const g=pedestal(kind==='bottle'?0xffba67:0x6cff9c);
- const model=kind==='bottle'?bottle(label):dollarRoll(dollar);
- if(kind==='bottle'){model.scale.setScalar(1.10);model.position.y=.08;}
- else{model.scale.setScalar(1.48);model.position.y=.55;}
+ const type=bottleTypeForEvent(seed);
+ const model=kind==='bottle'?makePremiumBottle(type,labels[type]):makeRolledBanknote(dollar,seed);
+ if(kind==='bottle'){model.scale.setScalar(1.13);model.position.y=.16;}
+ else{model.scale.setScalar(1.20);model.position.y=.28;}
  g.add(model);
- const glow=part(g,new T.TorusGeometry(1.16,.03,5,32),
+ const rim=part(g,new T.TorusGeometry(1.16,.035,5,32),
   new T.MeshBasicMaterial({color:kind==='bottle'?0xd19c55:0x37f4a9}),0,.12,0);
- glow.rotation.x=Math.PI/2;
+ rim.rotation.x=Math.PI/2;
  g.userData.animated=model;
  return g;
 }
@@ -126,9 +131,10 @@ export class RaveShow{
  constructor(scene){
   this.scene=scene;this.dancers=[];this.pods=[];this.ready=false;this.minimal=false;
   this.pendingPickupDancers=new Set();this.activePickupDancers=new Set();this.dancerAsset=null;
-  this.whiskyLabel=canvasTexture('whisky');this.banknoteTexture=canvasTexture('dollar');
+  this.bottleLabels=Object.fromEntries(BOTTLE_TYPES.map(k=>[k,makeBottleLabelTexture(k)]));
+  this.banknoteTexture=makeBanknoteTexture();
   for(const spec of PROP_SLOTS){
-   const group=spotlightPod(spec.kind,this.whiskyLabel,this.banknoteTexture);
+   const group=spotlightPod(spec.kind,this.bottleLabels,this.banknoteTexture,spec.slot);
    scene.add(group);this.pods.push({...spec,group});
   }
   // GLB is an optional independent decoration: network failure must never
@@ -145,7 +151,7 @@ export class RaveShow{
     const stage=pedestal(spec.side<0?0xff55c2:0x38f8f3);
     stage.visible=!this.minimal||spec.side<0;
     this.scene.add(stage);
-    const person=cloneSkinned(gltf.scene);
+    const person=styleNightclubDancer(cloneSkinned(gltf.scene));
     // Pose first, then normalize bounds: prevents the oversized-boot problem
     // that an earlier character demonstration showed on iPhone.
     const mixer=new T.AnimationMixer(person);
@@ -185,9 +191,9 @@ export class RaveShow{
  }
  // The user-facing collectible has its own 3D geometry and reward. The
  // separate scenery pods remain purely decorative and never score points.
- makePickup(kind){
+ makePickup(kind,eventId=0){
   const group=new T.Group();
-  group.userData.kind=kind;
+  group.userData.kind=kind;group.userData.eventId=eventId;
   const highlight=kind==='dancer'?0xff5ecc:kind==='cash'?0x5bfca7:0xffc56b;
   const base=part(group,new T.CylinderGeometry(.89,.96,.13,24),
    new T.MeshStandardMaterial({color:0x11192c,metalness:.75,roughness:.28}),0,.11,0);
@@ -195,14 +201,16 @@ export class RaveShow{
    new T.MeshBasicMaterial({color:highlight}),0,.2,0);
   aura.rotation.x=Math.PI/2;
   if(kind==='bottle'){
-   const item=bottle(this.whiskyLabel);
-   item.scale.setScalar(.82);
+   const type=bottleTypeForEvent(eventId);
+   group.userData.bottleType=type;
+   const item=makePremiumBottle(type,this.bottleLabels[type]);
+   item.scale.setScalar(type==='cognac'?.92:.97);
    item.position.y=.2;
    group.add(item);
   }else if(kind==='cash'){
-   const item=dollarRoll(this.banknoteTexture);
+   const item=makeRolledBanknote(this.banknoteTexture,eventId);
    item.scale.setScalar(1.25);
-   item.position.y=.34;
+   item.position.y=.24;
    group.add(item);
   }else if(kind==='dancer'){
    // The clear costume-shaped fallback is shown only until the skinned GLB
@@ -246,7 +254,7 @@ export class RaveShow{
   try{
    const asset=this.dancerAsset,clip=asset.animations.find(a=>/samba|dance/i.test(a.name))||asset.animations[0];
    if(!clip)return;
-   const person=cloneSkinned(asset.scene);
+   const person=styleNightclubDancer(cloneSkinned(asset.scene));
    const mixer=new T.AnimationMixer(person);
    const action=mixer.clipAction(clip);action.play();mixer.update(.03);
    person.updateMatrixWorld(true);
@@ -284,10 +292,13 @@ export class RaveShow{
   pickup.userData.dancerAction?.stop();
   const sharedSkinMeshes=new Set();
   pickup.userData.dancerPerson?.traverse(o=>{if(o.isMesh)sharedSkinMeshes.add(o);});
-  // Only dispose our procedural geometry/materials. GLB meshes share
-  // resources with the decorative performers and must remain intact.
+  // The GLB's geometry is shared but the individual costume shader is not.
   pickup.traverse(o=>{
-   if(sharedSkinMeshes.has(o))return;
+   if(sharedSkinMeshes.has(o)){
+    for(const m of (Array.isArray(o.material)?o.material:[o.material]))
+     if(m?.userData?.stageOwned)m.dispose();
+    return;
+   }
    if(o.isSprite){
     o.material?.map?.dispose();
     o.material?.dispose();
