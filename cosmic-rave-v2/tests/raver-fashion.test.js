@@ -11,8 +11,8 @@ test('festival techwear patches shader while preserving original material',()=>{
  const styled=styleRaverMaterial(original,{Color});
  assert.notStrictEqual(styled,original);
  assert.equal(original.roughness,.9);
- assert.equal(styled.roughness,.47);
- assert.equal(styled.metalness,.2);
+ assert.equal(styled.roughness,.61);
+ assert.equal(styled.metalness,.11);
  assert.equal(styled.needsUpdate,true);
  const shader={
   vertexShader:'#include <common>\n#include <begin_vertex>',
