@@ -142,7 +142,7 @@ export class RaveShow{
    if(!clip)throw Error('The sample has no dance animation');
    for(const spec of DANCER_SLOTS){
     const stage=pedestal(spec.side<0?0xff55c2:0x38f8f3);
-    stage.visible=!this.minimal;
+    stage.visible=!this.minimal||spec.side<0;
     this.scene.add(stage);
     const person=cloneSkinned(gltf.scene);
     // Pose first, then normalize bounds: prevents the oversized-boot problem
@@ -182,7 +182,7 @@ export class RaveShow{
  }
  setQuality(preset){
   this.minimal=preset==='low';
-  for(const d of this.dancers)d.stage.visible=!this.minimal;
+  for(const d of this.dancers)d.stage.visible=!this.minimal||d.side<0;
   for(const p of this.pods)p.group.visible=!this.minimal||p.slot%2===0;
  }
  update(beat,dt,travel){
