@@ -27,3 +27,5 @@ Tunnel Pressure: оригинальная процедурная компози�
 Three.js 0.160.1: MIT, https://threejs.org/license/.
 Manrope: SIL Open Font License, Google Fonts. При отсутствии сети system-ui.
 Окружение и интерфейс создаются кодом этого проекта; сторонних изображений нет.
+
+Снимок дерева репозитория технического источника: 5821923af517ac5fdc82505faa92a0d575fc1b1a.

@@ -9,7 +9,9 @@ export class Run{
  update(beat,dt){if(this.done)return;const before=this.x,old=this.beat;this.x+=Math.max(-12*dt,Math.min(12*dt,this.target-this.x));this.beat=beat;
  for(const e of this.events){if(e.passed||beat<e.beat-.08)continue;const t=beat===old?1:Math.max(0,Math.min(1,(e.beat-old)/(beat-old)));const x=before+(this.x-before)*t;
  if(e.kind==='orb'||e.kind==='shield'){if(beat>=e.beat){e.passed=true;if(Math.abs(e.x-x)<.9){this.combo++;this.score+=100*this.multiplier;if(e.kind==='shield')this.shield=true;this.feedback.push({type:e.kind,x:e.x});}}}
- else if(beat>=e.beat){e.passed=true;if(Math.abs(e.x-x)<1.03&&!this.zen&&beat>this.invulnerable){if(this.shield)this.shield=false;else this.health--;this.combo=0;this.invulnerable=beat+3;this.feedback.push({type:'hit',x});if(this.health<=0)this.done=true;}else if(Math.abs(e.x-x)>=1.03){this.score+=20*this.multiplier;this.dodged++;}}
+ else {const half=.07;if(old<=e.beat+half&&beat>=e.beat-half){const span=beat-old;const start=span>0?Math.max(0,(e.beat-half-old)/span):0,end=span>0?Math.min(1,(e.beat+half-old)/span):1;const xa=before+(this.x-before)*start,xb=before+(this.x-before)*end;const overlaps=Math.max(xa,xb)>e.x-1.03&&Math.min(xa,xb)<e.x+1.03;if(overlaps&&!e.hit&&!this.zen&&beat>this.invulnerable){e.hit=true;if(this.shield)this.shield=false;else this.health--;this.combo=0;this.invulnerable=beat+3;this.feedback.push({type:'hit',x});if(this.health<=0)this.done=true;}}
+ if(beat>e.beat+half){e.passed=true;if(!e.hit){this.score+=20*this.multiplier;this.dodged++;}}}
+
  }
  if(beat>=DURATION)this.done=true;
  }
