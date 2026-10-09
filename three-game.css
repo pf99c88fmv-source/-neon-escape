@@ -5,3 +5,6 @@
 #steering-pad{position:fixed;z-index:7;left:17%;right:17%;bottom:calc(env(safe-area-inset-bottom,0px) + 79px);height:83px;border:1px solid #4beaff8a;border-radius:24px;background:#081529df;box-shadow:0 0 22px #08b9ff3d,inset 0 0 18px #122f65;touch-action:none;user-select:none;-webkit-user-select:none;display:none;align-items:center;justify-content:center;flex-direction:column;gap:12px}body.running #steering-pad{display:flex}.steering-label{font:700 9px system-ui,sans-serif;color:#80c9ee;letter-spacing:1.6px;pointer-events:none}.steering-track{width:76%;height:7px;border-radius:9px;background:#184775;position:relative;pointer-events:none}.steering-thumb{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:32px;height:32px;border-radius:50%;background:#64ecff;border:4px solid #c3ffff;box-shadow:0 0 17px #00eaff;pointer-events:none}
 
 .steering-track{background:repeating-linear-gradient(90deg,#214a7a 0%,#214a7a 19%,#8deeff 19%,#8deeff 20%);height:9px}.steering-thumb{transition:left .08s ease-out}
+
+/* Invisible thumb zone; gameplay remains unobstructed. */
+#steering-pad,body.running #steering-pad{display:block;position:fixed;left:7%;right:7%;bottom:calc(env(safe-area-inset-bottom,0px) + 76px);height:112px;z-index:6;background:transparent;border:0;box-shadow:none;border-radius:0;touch-action:none;user-select:none;-webkit-user-select:none}
