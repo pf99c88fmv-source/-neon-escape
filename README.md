@@ -1,15 +1,46 @@
 # Neon Escape
 
-Mobile-first HTML5 Canvas arcade game for Telegram Mini Apps.
+Мобильная HTML5 Canvas игра для Telegram Mini Apps. Управляйте кораблём пальцем, уклоняйтесь от красных блоков и собирайте голубые кристаллы. На компьютере доступны стрелки и A/D.
 
-## Run locally
-Open `index.html` in a browser, or serve it with `python3 -m http.server 8000` and open `http://localhost:8000`.
+Сохранены случайные препятствия, рост сложности, три жизни, временная неуязвимость после столкновения, очки, локальный рекорд, повторная игра и кнопка обмена результатом.
 
-## Publish
-Deploy `index.html` to an HTTPS static hosting provider (GitHub Pages, Cloudflare Pages, or similar). Create a bot with @BotFather, configure its Mini App/menu button to open your HTTPS URL, and launch it from Telegram.
+## Локальный запуск
 
-## Features
-Touch controls, random obstacles, collectible crystals, lives, score, local high score, replay, share button, and Telegram WebApp initialization when available.
+Сборка не нужна. В каталоге проекта выполните:
 
-## Notes
-This MVP stores only the high score in localStorage. No server or global leaderboard is included. The share button shares text; add the published game URL to improve sharing.
+```sh
+python3 -m http.server 8000
+```
+
+Откройте http://localhost:8000. Игра работает и вне Telegram. Официальный SDK загружается с https://telegram.org/js/telegram-web-app.js; при его недоступности остаётся браузерный режим.
+
+## Запуск в Telegram
+
+1. Разместите `index.html` на статическом HTTPS-хостинге: GitHub Pages, Cloudflare Pages или аналогичном. При использовании GitHub Pages выберите ветку с принятыми исправлениями и каталог `/ (root)` в Settings → Pages.
+2. Проверьте опубликованный HTTPS-адрес в мобильном браузере.
+3. Создайте или выберите бота через @BotFather. Настройте Main Mini App или кнопку меню командой `/setmenubutton`, указав опубликованный HTTPS-адрес игры.
+4. Откройте игру через кнопку бота в Telegram и проверьте управление пальцем, поворот экрана, сворачивание и возврат, завершение и повторный запуск игры.
+
+SDK инициализируется через `ready()` и `expand()`. На поддерживаемых клиентах отключены вертикальные жесты сворачивания, учитываются стабильная высота окна и безопасные отступы Telegram. Игра приостанавливается при скрытии страницы или деактивации Mini App. Поворот экрана обновляет положение корабля и границы управления.
+
+Токен бота не нужен клиенту и не должен размещаться в HTML. Сервер и глобальная таблица рекордов отсутствуют. Если позже появится сервер, проверяйте `initData` на сервере перед доверенными действиями.
+
+## Проверки
+
+Нужны Node.js и Chromium:
+
+```sh
+npm install
+npx playwright install chromium
+npm test
+```
+
+Тест использует `/usr/bin/chromium`, если он доступен, иначе Chromium Playwright. Можно задать путь через `CHROMIUM_PATH`.
+
+Проверки в реальном headless Chromium покрывают браузерный режим и имитацию Telegram API, касание, клавиатуру, изменение размеров, сбор кристалла, потерю жизней, повторный запуск, паузу, ошибки хранилища и обмена результатом. Telegram SDK в тесте подменяется локально; это не заменяет проверку в реальном Telegram на Android/iOS.
+
+## Хранение и обмен результатом
+
+Рекорд хранится только в localStorage. При блокировке хранилища игра продолжает работать, рекорд сохраняется лишь до перезагрузки. Некорректный сохранённый рекорд игнорируется.
+
+Кнопка «Поделиться» использует системный обмен текстом, а при отсутствии этого API копирует текст в буфер. Отмена не вызывает ошибку; отказ доступа отображается на кнопке. Кнопка не отправляет результат боту. URL с параметрами Telegram не включается в сообщение.

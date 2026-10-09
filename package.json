@@ -1,0 +1,7 @@
+{
+  "name": "neon-escape",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": { "test": "node tests/smoke.cjs" },
+  "devDependencies": { "playwright": "1.62.1" }
+}
