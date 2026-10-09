@@ -21,6 +21,30 @@ export class TunnelArchitecture{
    lane:new T.MeshBasicMaterial({color:0x2f9ec3,transparent:true,opacity:.54,depthWrite:false}),
    platinum:new T.MeshStandardMaterial({color:0x657b91,metalness:.9,roughness:.2}),
    ice:new T.MeshBasicMaterial({color:0x8de9ff,transparent:true,opacity:.63,depthWrite:false}),
+   floor:new T.ShaderMaterial({
+    uniforms:{uTime:{value:0},uPulse:{value:0},uTint:{value:new T.Color(0x218dba)}},
+    transparent:true,depthWrite:false,side:T.DoubleSide,blending:T.AdditiveBlending,
+    vertexShader:`varying vec2 vUv;void main(){
+     vUv=uv;vec4 p=vec4(position,1.);
+     #ifdef USE_INSTANCING
+     p=instanceMatrix*p;
+     #endif
+     gl_Position=projectionMatrix*modelViewMatrix*p;
+    }`,
+    fragmentShader:`precision mediump float;
+     varying vec2 vUv;uniform float uTime,uPulse;uniform vec3 uTint;
+     void main(){
+      float x=vUv.x-.5, y=vUv.y;
+      float lane=(1.-smoothstep(.005,.028,abs(x-.25)))+
+                 (1.-smoothstep(.005,.028,abs(x+.25)));
+      float wave=pow(max(0.,sin(y*11.-uTime*2.7)),18.);
+      float reflection=exp(-abs(x)*3.5)*(.035+.11*wave);
+      float pulse=min(1.,uPulse);
+      vec3 color=uTint*(.30+lane*.6+pulse*.22);
+      float opacity=clamp(lane*.095+reflection*(.7+pulse*.2),0.,.28);
+      gl_FragColor=vec4(color,opacity);
+     }`
+   }),
    holo:new T.ShaderMaterial({
     uniforms:{uTime:{value:0},uPulse:{value:0},uTint:{value:new T.Color(0x31b8f2)}},
     transparent:true,depthWrite:false,side:T.DoubleSide,blending:T.AdditiveBlending,
@@ -80,17 +104,24 @@ export class TunnelArchitecture{
   const type=i%4;
   // Broad silver roof curves and inlaid luminous arcs soften the previously
   // boxy corridor. Low-radius tubes stay overhead and outside the safe lanes.
-  this.add(i,'vault','platinum',[0,0,-.46],[1,1,1]);
-  this.add(i,'inVault',type===0?'ultraviolet':'ice',[0,.06,.28],[1,1,1]);
-  if(type===0)this.add(i,'vault','cyan',[0,0,-3.2],[.988,.99,1]);
+  if(type!==3)this.add(i,'vault',type===0?'platinum':'brushed',[0,0,-.46],[1,1,1]);
+  if(type===0||type===2)this.add(i,'inVault',type===0?'ultraviolet':'ice',[0,.06,.28],[1,1,1]);
+  if(type===0)this.add(i,'vault','cyan',[0,0,-3.2],[.987,.989,1]);
+  // An open, human-sized central passage inside a huge signature gate.
+  if(type===0){
+   this.add(i,'torus','cyan',[0,4.40,-2.15],[2.97,2.53,1.35]);
+   this.add(i,'torus','ultraviolet',[0,4.40,-2.39],[3.09,2.65,1.3]);
+  }
   // Faceted secondary supports remain to provide structural depth.
   // Faceted roof: structural ribs, inset dark backing and emissive filaments.
   for(let k=0;k<ARCH_PROFILE.length-1;k++){
    const [x,y]=ARCH_PROFILE[k],[xx,yy]=ARCH_PROFILE[k+1];
-   this.beam(i,'shell',[x,y,.1],[xx,yy,.1],type===0?.42:.35,.66);
-   this.beam(i,'recess',[x*.982,y-.08,.71],[xx*.982,yy-.08,.71],.18,.07);
-   this.beam(i,(k%4===0&&type===0)?'amber':type===2?'ultraviolet':'cyan',
-     [x*.97,y-.14,.79],[xx*.97,yy-.14,.79],type===0?.075:.055,.09);
+   if(type===0||type===2){
+    this.beam(i,'shell',[x,y,.1],[xx,yy,.1],type===0?.34:.22,.48);
+    if(type===0)this.beam(i,'recess',[x*.982,y-.08,.71],[xx*.982,yy-.08,.71],.12,.07);
+    this.beam(i,type===0?'ultraviolet':'ice',
+     [x*.97,y-.14,.79],[xx*.97,yy-.14,.79],type===0?.061:.038,.07);
+   }
   }
   for(const side of [-1,1]){
    this.beam(i,'brushed',[side*6.25,.45,-.65],[side*7.25,4.2,-2.3],.28,.55);
@@ -111,6 +142,7 @@ export class TunnelArchitecture{
   }
   // The playable corridor is 9.6 world units wide. Side structures never enter it.
   this.add(i,'block','deep',[0,-.28,-5.55],[10.4,.34,11.37]);
+  this.add(i,'pane','floor',[0,-.082,-5.55],[9.27,11.36,1],[-Math.PI/2,0,0]);
   // Brushed silver runway rails add material depth without extra light beams.
   for(const side of [-1,1]){
    this.add(i,'block','platinum',[side*4.92,-.26,-5.55],[.14,.12,10.7]);
@@ -122,8 +154,9 @@ export class TunnelArchitecture{
    this.add(i,'block',i%3===0?'ultraviolet':'cyan',[side*4.72,-.03,-5.55],[.075,.075,10.65]);
    this.add(i,'block','brushed',[side*4.84,-.22,-5.55],[.32,.4,10.65]);
   }
-  // Deep hanging canopy is above the central field of play.
-  for(const x of [-2.9,0,2.9]){
+  // Deep hanging canopy is above the central field of play. Not every
+  // segment has three lamps; the eye needs dark moments between drops.
+  for(const x of (type===3?[0]:type===1?[-2.9,2.9]:[-2.9,0,2.9])){
    this.add(i,'block','recess',[x,8.63,-5.7],[1.18,.11,4.45]);
    this.add(i,'block','ice',[x,8.52,-5.7],[.58,.038,2.5]);
   }
@@ -163,10 +196,12 @@ export class TunnelArchitecture{
    batch.instanced.instanceMatrix.needsUpdate=true;
   }
   const pulse=Math.exp(-(beat%1)*8);
+  this.materials.floor.uniforms.uTime.value=beat;
+  this.materials.floor.uniforms.uPulse.value=reduced?pulse*.45:pulse;
   this.materials.holo.uniforms.uTime.value=beat*.45;
   this.materials.holo.uniforms.uPulse.value=reduced?pulse*.4:pulse;
   this.materials.glass.opacity=(reduced?.17:.22)+pulse*(reduced?.035:.1);
-  this.materials.lane.opacity=.53+pulse*(reduced?.1:.23);
+  this.materials.lane.opacity=.37+pulse*(reduced?.07:.14);
   this.materials.amber.emissiveIntensity=1.2+pulse*(reduced?.15:.4);
  }
 }
