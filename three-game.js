@@ -84,6 +84,27 @@ for(let i=0;i<12;i++){
  }
  g.position.z=-i*16;runway.add(g);hologramTiles.push(g);
 }
+// v4.5: rhythmic runway centerline, distant light gates and animated color wash.
+// Materials are shared to keep mobile GPU memory usage predictable.
+const centerGlow=new THREE.MeshBasicMaterial({color:0x38eaff,transparent:true,opacity:.58,depthWrite:false});
+const gatePink=new THREE.MeshBasicMaterial({color:0xff39bc,transparent:true,opacity:.82,depthWrite:false});
+const gateBlue=new THREE.MeshBasicMaterial({color:0x48dfff,transparent:true,opacity:.8,depthWrite:false});
+const pulseGates=[];
+for(let i=0;i<12;i++){
+ const gate=new THREE.Group();
+ const material=i%3===0?gatePink:gateBlue;
+ for(const side of [-1,1]){
+  gate.add(mesh(new THREE.BoxGeometry(.11,4.6,.15),material,side*8.35,3.4,0));
+  gate.add(mesh(new THREE.BoxGeometry(.45,.16,.38),material,side*8.35,5.75,0));
+ }
+ gate.add(mesh(new THREE.BoxGeometry(16.8,.1,.17),material,0,5.75,0));
+ gate.position.z=-i*16;tunnel.add(gate);pulseGates.push(gate);
+}
+const centerMarkers=[];
+for(let i=0;i<14;i++){
+ const marker=mesh(new THREE.BoxGeometry(.2,.045,1.4),centerGlow,0,-3.57,-i*13);
+ runway.add(marker);centerMarkers.push(marker);
+}
 const ceilingGlow=new THREE.PointLight(0xd33cff,17,22);ceilingGlow.position.set(0,7,-15);scene.add(ceilingGlow);
 // Premium club ceiling: structural beams, light bars and holographic dance-floor screens.
 const clubDecor=[];
@@ -323,6 +344,12 @@ function makeDancer(index){
   hips.add(mesh(new THREE.BoxGeometry(.12,.1,.31),neon,side*.28,-.46,-.09));
  }
  headPivot.add(mesh(new THREE.BoxGeometry(.15,.027,.027),lipstick,0,.19,-.264));
+// Small reflective shoulder epaulettes improve readability from the chase camera.
+for(const side of [-1,1]){
+ torso.add(mesh(new THREE.SphereGeometry(.16,10,7),silver,side*.37,.25,0));
+ torso.add(mesh(new THREE.BoxGeometry(.08,.3,.12),neon,side*.43,.11,-.13,0,0,side*.25));
+}
+
  torso.add(mesh(new THREE.TorusGeometry(.19,.025,5,14),silver,0,-.1,-.29));
  torso.add(mesh(new THREE.BoxGeometry(.1,.36,.055),neon,0,-.12,-.33));
  // Distinct hairstyles and reflective festival wear create more legible dancers.
@@ -421,7 +448,10 @@ window.addEventListener('keydown',e=>{if(e.key==='ArrowLeft')setLane(Math.round(
 play.addEventListener('click',()=>{if(contextLost){location.reload();return;}screen.style.display='';startGame();});mute.addEventListener('click',()=>{muted=!muted;mute.textContent=muted?'♪̸':'♫';track.muted=muted;if(trackAvailable)trackLabel(muted?'♪ ТРЕК БЕЗ ЗВУКА':'♫ VITTY ИГРАЕТ');if(master&&audio)master.gain.setTargetAtTime(muted||(trackAvailable&&!track.paused)?0:.55,audio.currentTime,.012);});
 function resize(){camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight);}window.addEventListener('resize',resize);
 document.addEventListener('visibilitychange',()=>{paused=document.hidden;last=0;if(audio){if(paused){track.pause();audio.suspend().catch(()=>{});}else if(running){if(trackAvailable)track.play().catch(()=>{});const activeRun=runId;audio.resume().then(()=>{if(!running||paused||activeRun!==runId)return;const currentStep=Math.max(0,Math.ceil((audio.currentTime-beatZero)/(beat/4)));note=currentStep;nextNote=beatZero+currentStep*(beat/4);}).catch(()=>{});}}});
-function animate(t){requestAnimationFrame(animate);const dt=last?Math.min((t-last)/1000,.04):0;last=t;const active=running&&!paused&&!contextLost;if(active&&dt>0){perfTime+=dt;perfFrames++;perfCooldown=Math.max(0,perfCooldown-dt);if(perfTime>=3){const fps=perfFrames/perfTime;lastKnownFps=Math.round(fps);if(running)statusEl.textContent=(Math.floor(Math.max(0,elapsed)/beat/16)%2===0?'DRIVE':'HYPERDRIVE')+' · 132 BPM · '+lastKnownFps+' FPS';if(perfCooldown===0&&fps<43&&renderScale>0.9){renderScale=Math.max(.9,renderScale-.2);renderer.setPixelRatio(renderScale);perfCooldown=6;}else if(perfCooldown===0&&fps>57&&renderScale<Math.min(devicePixelRatio,1.7)){renderScale=Math.min(Math.min(devicePixelRatio,1.7),renderScale+.1);renderer.setPixelRatio(renderScale);perfCooldown=8;}perfTime=0;perfFrames=0;}}if(active){elapsed+=dt;score+=dt*15;schedule();const speed=33+Math.min(35,elapsed*.45);const rhythmTime=trackAvailable&&!track.paused?track.currentTime:(audio&&beatZero>0&&audio.state==='running'?Math.max(0,audio.currentTime-beatZero):elapsed);while(nextSpawnTime<rhythmTime-1){nextSpawnTime+=beat*2;spawnBeat++;}let spawnedThisFrame=0;while(nextSpawnTime>=rhythmTime-1&&distanceBetween(rhythmTime,nextSpawnTime)<=110+collisionZ&&spawnedThisFrame<24){addObstacle(spawnBeat++,nextSpawnTime);nextSpawnTime+=beat*2;spawnedThisFrame++;}beatPulse=Math.max(0,1-(rhythmTime%beat)/beat);const visualBeat=Math.floor(rhythmTime/beat);if(visualBeat!==lastBeatVisual){lastBeatVisual=visualBeat;statusEl.textContent=(Math.floor(visualBeat/16)%2===0?'DRIVE':'HYPERDRIVE')+' · 132 BPM · '+lastKnownFps+' FPS';}const tunnelDistance=distanceAt(rhythmTime);for(let i=0;i<runwayChevrons.length;i++){runwayChevrons[i].position.z=12-(((i*13-tunnelDistance)%(runwayChevrons.length*13)+(runwayChevrons.length*13))%(runwayChevrons.length*13));}
+function animate(t){requestAnimationFrame(animate);const dt=last?Math.min((t-last)/1000,.04):0;last=t;const active=running&&!paused&&!contextLost;if(active&&dt>0){perfTime+=dt;perfFrames++;perfCooldown=Math.max(0,perfCooldown-dt);if(perfTime>=3){const fps=perfFrames/perfTime;lastKnownFps=Math.round(fps);if(running)statusEl.textContent=(Math.floor(Math.max(0,elapsed)/beat/16)%2===0?'DRIVE':'HYPERDRIVE')+' · 132 BPM · '+lastKnownFps+' FPS';if(perfCooldown===0&&fps<43&&renderScale>0.9){renderScale=Math.max(.9,renderScale-.2);renderer.setPixelRatio(renderScale);perfCooldown=6;}else if(perfCooldown===0&&fps>57&&renderScale<Math.min(devicePixelRatio,1.7)){renderScale=Math.min(Math.min(devicePixelRatio,1.7),renderScale+.1);renderer.setPixelRatio(renderScale);perfCooldown=8;}perfTime=0;perfFrames=0;}}if(active){elapsed+=dt;score+=dt*15;schedule();const speed=33+Math.min(35,elapsed*.45);const rhythmTime=trackAvailable&&!track.paused?track.currentTime:(audio&&beatZero>0&&audio.state==='running'?Math.max(0,audio.currentTime-beatZero):elapsed);while(nextSpawnTime<rhythmTime-1){nextSpawnTime+=beat*2;spawnBeat++;}let spawnedThisFrame=0;while(nextSpawnTime>=rhythmTime-1&&distanceBetween(rhythmTime,nextSpawnTime)<=110+collisionZ&&spawnedThisFrame<24){addObstacle(spawnBeat++,nextSpawnTime);nextSpawnTime+=beat*2;spawnedThisFrame++;}beatPulse=Math.max(0,1-(rhythmTime%beat)/beat);const visualBeat=Math.floor(rhythmTime/beat);if(visualBeat!==lastBeatVisual){lastBeatVisual=visualBeat;statusEl.textContent=(Math.floor(visualBeat/16)%2===0?'DRIVE':'HYPERDRIVE')+' · 132 BPM · '+lastKnownFps+' FPS';}const tunnelDistance=distanceAt(rhythmTime);for(let i=0;i<pulseGates.length;i++){const gate=pulseGates[i];gate.position.z=12-(((i*16-tunnelDistance)%(pulseGates.length*16)+(pulseGates.length*16))%(pulseGates.length*16));gate.scale.x=1+beatPulse*.018;}
+for(let i=0;i<centerMarkers.length;i++){centerMarkers[i].position.z=12-(((i*13-tunnelDistance)%(centerMarkers.length*13)+(centerMarkers.length*13))%(centerMarkers.length*13));}
+centerGlow.opacity=.3+beatPulse*.4;gatePink.opacity=.55+beatPulse*.35;gateBlue.opacity=.55+beatPulse*.3;
+for(let i=0;i<runwayChevrons.length;i++){runwayChevrons[i].position.z=12-(((i*13-tunnelDistance)%(runwayChevrons.length*13)+(runwayChevrons.length*13))%(runwayChevrons.length*13));}
 for(let i=0;i<hologramTiles.length;i++){hologramTiles[i].position.z=12-(((i*16-tunnelDistance)%(hologramTiles.length*16)+(hologramTiles.length*16))%(hologramTiles.length*16));}
 tileMaterial.opacity=.1+beatPulse*.13;
 for(let i=0;i<curtains.length;i++){const g=curtains[i];g.position.z=12-(((i*20-tunnelDistance)%(curtains.length*20)+(curtains.length*20))%(curtains.length*20));g.rotation.z=Math.sin(rhythmTime*.7+i)*.025;}
