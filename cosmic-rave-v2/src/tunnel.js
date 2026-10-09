@@ -8,8 +8,8 @@ const archPoints=Array.from({length:27},(_,i)=>{
  const a=Math.PI-i*Math.PI/26;
  return new T.Vector3(Math.cos(a)*6.12,.40+Math.sin(a)*8.16,0);
 });
-const smoothVault=new T.TubeGeometry(new T.CatmullRomCurve3(archPoints),88,.12,10,false);
-const innerVault=new T.TubeGeometry(new T.CatmullRomCurve3(archPoints.map(p=>new T.Vector3(p.x*.955,p.y*.955,0))),84,.048,8,false);
+const smoothVault=new T.TubeGeometry(new T.CatmullRomCurve3(archPoints),90,.19,10,false);
+const innerVault=new T.TubeGeometry(new T.CatmullRomCurve3(archPoints.map(p=>new T.Vector3(p.x*.962,p.y*.970,0))),90,.042,8,false);
 export class TunnelArchitecture{
  constructor(scene,m){
   this.materials={
@@ -19,8 +19,11 @@ export class TunnelArchitecture{
    amber:new T.MeshStandardMaterial({color:0xffc17a,emissive:0xe56b28,emissiveIntensity:1.2,metalness:.5,roughness:.22}),
    glass:new T.MeshBasicMaterial({color:0x2389b9,transparent:true,opacity:.18,depthWrite:false,side:T.DoubleSide,blending:T.AdditiveBlending}),
    lane:new T.MeshBasicMaterial({color:0x2f9ec3,transparent:true,opacity:.54,depthWrite:false}),
-   platinum:new T.MeshStandardMaterial({color:0x657b91,metalness:.9,roughness:.2}),
-   ice:new T.MeshBasicMaterial({color:0x8de9ff,transparent:true,opacity:.52,depthWrite:false}),
+   platinum:new T.MeshStandardMaterial({color:0x65778b,metalness:.73,roughness:.34}),
+   graphite:new T.MeshStandardMaterial({color:0x151e30,metalness:.62,roughness:.40}),
+   satin:new T.MeshStandardMaterial({color:0x37465b,metalness:.75,roughness:.28}),
+   warm:new T.MeshBasicMaterial({color:0xffc69e,transparent:true,opacity:.48,depthWrite:false}),
+   ice:new T.MeshBasicMaterial({color:0xa2e3f5,transparent:true,opacity:.43,depthWrite:false}),
    halo:new T.MeshBasicMaterial({
     color:0x52d8ff,transparent:true,opacity:.105,
     depthWrite:false,blending:T.AdditiveBlending,side:T.DoubleSide
@@ -48,8 +51,8 @@ export class TunnelArchitecture{
       float wave=pow(max(0.,sin(y*11.-uTime*2.7)),18.);
       float reflection=exp(-abs(x)*3.5)*(.035+.11*wave);
       float pulse=min(1.,uPulse);
-      vec3 color=uTint*(.30+lane*.6+pulse*.22);
-      float opacity=clamp(lane*.095+reflection*(.7+pulse*.2),0.,.28);
+      vec3 color=uTint*(.22+lane*.44+pulse*.14);
+      float opacity=clamp(lane*.075+reflection*(.48+pulse*.10),0.,.16);
       gl_FragColor=vec4(color,opacity);
      }`
    }),
@@ -61,16 +64,15 @@ export class TunnelArchitecture{
      void main(){
       float feather=smoothstep(.02,.14,vUv.x)*(1.-smoothstep(.86,.98,vUv.x));
       float edge=smoothstep(.01,.05,vUv.y)*(1.-smoothstep(.95,.99,vUv.y));
-      float lines=.22+.24*pow(.5+.5*sin(vUv.y*64.-uTime*4.),7.);
+      float lines=.08+.19*pow(.5+.5*sin(vUv.y*35.-uTime*.85),12.);
       float shimmer=.5+.5*sin(vUv.x*9.+vUv.y*6.-uTime*.7);
-      float alpha=feather*edge*(.16+lines*.35+shimmer*.07+uPulse*.11);
+      float alpha=feather*edge*(.10+lines*.19+shimmer*.03+uPulse*.045);
       gl_FragColor=vec4(uTint*(.55+shimmer*.3),alpha);
      }`
    })
   };
   this.geometry={
    block:new T.BoxGeometry(1,1,1),
-   torus:new T.TorusGeometry(1.65,.075,6,32),
    pane:new T.PlaneGeometry(1,1),
    vault:smoothVault,
    inVault:innerVault
@@ -109,91 +111,83 @@ export class TunnelArchitecture{
   this.parts.push({slot,shape:'block',material,matrix,spin:0});
  }
  bay(i){
-  const type=i%4;
-  // Broad silver roof curves and inlaid luminous arcs soften the previously
-  // boxy corridor. Low-radius tubes stay overhead and outside the safe lanes.
-  if(type!==3)this.add(i,'vault',type===0?'platinum':'brushed',[0,0,-.46],[1,1,1]);
-  // A low-opacity broad halo behind the emissive rim softens hard edges.
-  if(type===0||type===2)
-   this.add(i,'vault',type===0?'magentaHalo':'halo',[0,.018,-.57],[1.035,1.030,1.3]);
-  if(type===0||type===2)this.add(i,'inVault',type===0?'ultraviolet':'ice',[0,.06,.28],[1,1,1]);
-  if(type===0)this.add(i,'vault','cyan',[0,0,-3.2],[.987,.989,1]);
-  // An open, human-sized central passage inside a huge signature gate.
-  if(type===0){
-   this.add(i,'torus','cyan',[0,4.40,-2.15],[2.97,2.53,1.35]);
-   this.add(i,'torus','ultraviolet',[0,4.40,-2.39],[3.09,2.65,1.3]);
+  // Each bay is a coherent piece of architecture, not a stack of glowing
+  // rings. A six-bay cycle offers a hero portal, quiet facade, suspension
+  // deck, open view, stage balcony and a dark recovery beat.
+  const mode=i%6;
+  const hero=mode===0;
+  const bridge=mode===2;
+  const soft=mode===4;
+  const primary=hero||bridge||soft;
+  const zMid=-FRAME_STEP*.5;
+  const edgeGlow=hero?'cyan':bridge?'ice':'ultraviolet';
+
+  // Continuous black-titanium road, satin edging and deliberate lane markings.
+  this.add(i,'block','deep',[0,-.28,zMid],[10.45,.35,FRAME_STEP+.08]);
+  this.add(i,'block','graphite',[0,-.092,zMid],[9.7,.025,FRAME_STEP]);
+  this.add(i,'pane','floor',[0,-.072,zMid],[9.50,FRAME_STEP,1],[-Math.PI/2,0,0]);
+  for(const side of [-1,1]){
+   this.add(i,'block','platinum',[side*4.93,-.19,zMid],[.19,.28,FRAME_STEP-.05]);
+   this.add(i,'block','ice',[side*4.79,-.026,zMid],[.038,.022,FRAME_STEP-.18]);
+   this.add(i,'block','satin',[side*5.14,-.30,zMid],[.31,.20,FRAME_STEP-.05]);
   }
-  // Faceted secondary supports remain to provide structural depth.
-  // Faceted roof: structural ribs, inset dark backing and emissive filaments.
-  for(let k=0;k<ARCH_PROFILE.length-1;k++){
-   const [x,y]=ARCH_PROFILE[k],[xx,yy]=ARCH_PROFILE[k+1];
-   if(type===0||type===2){
-    this.beam(i,'shell',[x,y,.1],[xx,yy,.1],type===0?.34:.22,.48);
-    if(type===0)this.beam(i,'recess',[x*.982,y-.08,.71],[xx*.982,yy-.08,.71],.12,.07);
-    this.beam(i,type===0?'ultraviolet':'ice',
-     [x*.97,y-.14,.79],[xx*.97,yy-.14,.79],type===0?.061:.038,.07);
+  for(const x of [-2.42,0,2.42])
+   this.add(i,'block','lane',[x,-.054,zMid],[.018,.010,FRAME_STEP-.30]);
+
+  // Structural spine: the true half-elliptic arch is dark titanium on most
+  // frames, with a restrained inset light only at major architectural beats.
+  if(primary){
+   this.add(i,'vault',hero?'satin':'graphite',[0,0,-.48],[1,1,1]);
+   this.add(i,'vault','graphite',[0,0,-.63],[1.10,1.075,.96]);
+   if(hero||soft){
+    this.add(i,'inVault',edgeGlow,[0,.025,-.23],[1,1,1]);
+    this.add(i,'vault',hero?'halo':'magentaHalo',[0,.02,-.55],[1.06,1.06,1.0]);
    }
-  }
-  for(const side of [-1,1]){
-   this.beam(i,'brushed',[side*6.25,.45,-.65],[side*7.25,4.2,-2.3],.28,.55);
-   this.beam(i,'shell',[side*7.25,4.2,-2.3],[side*5.28,6.15,-3.2],.25,.48);
-   this.beam(i,'recess',[side*6.1,.45,-2.75],[side*6.1,5.65,-2.75],.95,.48);
-   this.beam(i,'cyan',[side*5.56,.75,-2.45],[side*5.56,5.2,-2.45],.055,.085);
-   this.add(i,'block','deep',[side*6.85,2.3,-5.5],[1.38,4.5,9.9]);
-   this.add(i,'block','brushed',[side*6.05,2.3,-5.5],[.13,4.3,9.8]);
-   // Two oriented side panes; their silhouettes are outside the playable width.
-   this.add(i,'pane','holo',[side*5.96,2.65,-5.6],[7.8,3.5,1],[0,side*Math.PI/2,0]);
-   this.add(i,'block',type===1?'ultraviolet':'cyan',[side*5.93,4.35,-5.6],[.065,.1,8.6]);
-   this.add(i,'block','shell',[side*7.1,-.12,-5.3],[2.5,.33,10.8]);
-   this.add(i,'block','deep',[side*7.55,1.1,-5.4],[.65,2.1,7.2]);
-   for(let t=0;t<3;t++){
-    this.add(i,'block',t===1?'cyan':'brushed',
-      [side*7.12,.65+t*1.02,-5.45],[.22,.12,5.75-t*.72]);
-   }
-  }
-  // The playable corridor is 9.6 world units wide. Side structures never enter it.
-  this.add(i,'block','deep',[0,-.28,-5.55],[10.4,.34,11.37]);
-  this.add(i,'pane','floor',[0,-.082,-5.55],[9.27,11.36,1],[-Math.PI/2,0,0]);
-  // Brushed silver runway rails add material depth without extra light beams.
-  for(const side of [-1,1]){
-   this.add(i,'block','platinum',[side*4.92,-.26,-5.55],[.14,.12,10.7]);
-   this.add(i,'block','ice',[side*4.82,-.13,-5.55],[.045,.02,10.7]);
-  }
-  for(const x of [-3.64,-1.22,1.22,3.64])
-   this.add(i,'block','lane',[x,-.095,-5.55],[.032,.016,10.7]);
-  for(const side of [-1,1]){
-   this.add(i,'block',i%3===0?'ultraviolet':'cyan',[side*4.72,-.03,-5.55],[.075,.075,10.65]);
-   this.add(i,'block','brushed',[side*4.84,-.22,-5.55],[.32,.4,10.65]);
-  }
-  // Deep hanging canopy is above the central field of play. Not every
-  // segment has three lamps; the eye needs dark moments between drops.
-  for(const x of (type===3?[0]:type===1?[-2.9,2.9]:[-2.9,0,2.9])){
-   this.add(i,'block','recess',[x,8.63,-5.7],[1.18,.11,4.45]);
-   this.add(i,'block','ice',[x,8.52,-5.7],[.58,.038,2.5]);
-  }
-  // Distinct alternating shapes prevent the repeated corridor look.
-  if(type===0){
-   this.add(i,'torus','ultraviolet',[0,8.22,-3.8],[1.16,1.16,1],[.24,0,0],.12);
-   this.add(i,'torus','cyan',[0,8.23,-3.76],[.65,.65,1],[0,.23,0],-.19);
+  }else if(mode===1||mode===5){
+   // Open bays give real contrast, keeping the stars and planets visible.
    for(const side of [-1,1])
-    this.beam(i,'amber',[side*7.1,4.25,-2],[side*8.3,6.2,-3.1],.12,.2);
-  }else if(type===1){
-   for(const side of [-1,1]){
-    this.beam(i,'ultraviolet',[side*6.02,1.1,-.7],[side*8.45,6.65,-7.6],.085,.15);
-    this.beam(i,'shell',[side*8.3,6.6,-7.6],[side*5.3,8.35,-9],.33,.48);
+    this.beam(i,'satin',[side*6.15,.42,-.15],[side*6.60,5.35,-1.0],.25,.48);
+  }
+
+  // Lower architectural walls are continuous but layered with regular dark
+  // shadow gaps, so light and space read as solid materials, not wireframes.
+  for(const side of [-1,1]){
+   this.add(i,'block','graphite',[side*6.42,1.81,zMid],[1.32,3.70,FRAME_STEP-.22]);
+   this.add(i,'block','deep',[side*5.79,2.32,zMid],[.12,2.65,FRAME_STEP-.45]);
+   this.add(i,'block','satin',[side*5.74,3.88,zMid],[.21,.23,FRAME_STEP-.80]);
+   this.add(i,'block','graphite',[side*7.05,.10,zMid],[2.05,.40,FRAME_STEP-.18]);
+   this.add(i,'block','platinum',[side*5.80,.22,zMid],[.16,.20,FRAME_STEP-.25]);
+
+   // A few panoramic cyan panels, not a bright screen on every wall.
+   if(hero||mode===3){
+    this.add(i,'pane','holo',[side*5.66,2.38,zMid],[FRAME_STEP-1.4,2.16,1],[0,side*Math.PI/2,0]);
+    this.add(i,'block',edgeGlow,[side*5.60,3.67,zMid],[.035,.035,FRAME_STEP-2.2]);
+   }else{
+    this.add(i,'block','satin',[side*5.63,2.26,zMid],[.13,1.06,FRAME_STEP-1.25]);
    }
-  }else if(type===2){
-   for(const side of [-1,1])
-    for(let k=0;k<4;k++)
-     this.add(i,'block','ultraviolet',[side*6.02,1.35+k*.78,-3.6-k*.5],[.055,.055,1.55]);
-   this.add(i,'block','brushed',[0,8.55,-2.9],[4.5,.28,2]);
-  }else{
-   for(const side of [-1,1]){
-    this.add(i,'block','shell',[side*7.85,3.8,-3.1],[1.2,3.3,1.2]);
-    this.add(i,'torus','cyan',[side*7.85,4.5,-2.48],[.45,.45,.75]);
-    this.add(i,'torus','ultraviolet',[side*7.85,3.15,-2.48],[.3,.3,.7]);
+   // Double-height vertical facade fins feel like a designed techno venue.
+   for(const localZ of [-FRAME_STEP*.39,FRAME_STEP*.39]){
+    this.add(i,'block','platinum',[side*5.83,2.57,zMid+localZ],[.20,4.54,.30]);
+    if(hero)this.add(i,'block','ice',[side*5.69,2.61,zMid+localZ],[.033,3.05,.08]);
    }
-   this.beam(i,'amber',[-3.8,7.65,-.5],[3.8,7.65,-.5],.09,.14);
+  }
+
+  // Ceiling light is inset into the building, safely above gameplay.
+  if(hero){
+   this.add(i,'block','graphite',[0,8.52,-2.8],[5.8,.34,2.8]);
+   for(const x of [-1.90,0,1.90]){
+    this.add(i,'block','platinum',[x,8.31,-2.8],[.67,.095,2.36]);
+    this.add(i,'block','ice',[x,8.22,-2.8],[.42,.032,1.70]);
+   }
+   for(const side of [-1,1]){
+    this.beam(i,'warm',[side*7.38,4.08,-1.15],[side*7.82,5.72,-3.9],.065,.10);
+   }
+  }else if(bridge){
+   this.add(i,'block','satin',[0,8.32,-2.8],[4.8,.25,2.1]);
+   this.add(i,'block','ice',[0,8.15,-2.8],[2.75,.032,.12]);
+  }else if(mode===3){
+   this.add(i,'block','graphite',[0,8.49,-2.2],[5.5,.20,1.0]);
+   this.add(i,'block','warm',[0,8.34,-2.2],[2.7,.026,.065]);
   }
  }
  update(travel,beat,reduced=true){
@@ -212,9 +206,9 @@ export class TunnelArchitecture{
   this.materials.holo.uniforms.uTime.value=beat*.45;
   this.materials.holo.uniforms.uPulse.value=reduced?pulse*.4:pulse;
   this.materials.glass.opacity=(reduced?.17:.22)+pulse*(reduced?.035:.1);
-  this.materials.halo.opacity=.082+pulse*(reduced?.008:.023);
-  this.materials.magentaHalo.opacity=.068+pulse*(reduced?.010:.027);
-  this.materials.lane.opacity=.32+pulse*(reduced?.065:.11);
+  this.materials.halo.opacity=.050+pulse*(reduced?.006:.014);
+  this.materials.magentaHalo.opacity=.043+pulse*(reduced?.006:.012);
+  this.materials.lane.opacity=.25+pulse*(reduced?.04:.07);
   this.materials.amber.emissiveIntensity=1.2+pulse*(reduced?.15:.4);
  }
 }
