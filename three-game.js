@@ -15,6 +15,7 @@ for(let i=0;i<540;i++){const j=i*3;starPositions[j]=(Math.random()-.5)*55;starPo
 const starGeometry=new THREE.BufferGeometry();starGeometry.setAttribute('position',new THREE.BufferAttribute(starPositions,3));
 const stars=new THREE.Points(starGeometry,new THREE.PointsMaterial({color:0x8acaff,size:.17,transparent:true,opacity:.72,sizeAttenuation:true}));scene.add(stars);
 const laneGuides=[];for(const x of [-4.4,-2.2,0,2.2,4.4]){const guide=mesh(new THREE.BoxGeometry(.055,.025,185),new THREE.MeshBasicMaterial({color:x===0?0x14c8f9:0x6537bd,transparent:true,opacity:.35}),x,-3.62,-83);scene.add(guide);laneGuides.push(guide);}
+const tunnelCore=mesh(new THREE.CylinderGeometry(8.85,8.85,185,8,1,true),new THREE.MeshBasicMaterial({color:0x091333,side:THREE.BackSide,transparent:true,opacity:.22}),0,0,-83,Math.PI/2);scene.add(tunnelCore);
 const ship=new THREE.Group();scene.add(ship);ship.position.set(0,-2.1,3);
 function mesh(geometry,material,x=0,y=0,z=0,rx=0,ry=0,rz=0){const o=new THREE.Mesh(geometry,material);o.position.set(x,y,z);o.rotation.set(rx,ry,rz);return o;}
 ship.add(mesh(new THREE.ConeGeometry(.72,3.6,4),cyan,0,0,-.25,-Math.PI/2,Math.PI/4));ship.add(mesh(new THREE.BoxGeometry(4.2,.16,1.35),dark,0,-.22,.35));ship.add(mesh(new THREE.BoxGeometry(2.2,.18,.85),violet,0,-.11,.1));ship.add(mesh(new THREE.SphereGeometry(.4,12,10),cyan,0,.2,-.3));for(const x of [-1.35,1.35]){ship.add(mesh(new THREE.CylinderGeometry(.32,.46,1.7,8),dark,x,-.23,.75,Math.PI/2));ship.add(mesh(new THREE.SphereGeometry(.28,12,10),cyan,x,-.23,1.65));}
