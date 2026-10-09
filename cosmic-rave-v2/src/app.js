@@ -1,12 +1,12 @@
-import {World} from './world.js?v=premium-show-1';import {Character} from './character.js?v=premium-outfit-1';import {Input} from './input.js';import {AudioEngine} from './audio.js?v=vitty132-1';import {Run,SPB,DURATION,zones,zoneAt} from './course.js';import {read,save} from './save.js';
+import {World} from './world.js?v=stage2-arcade-1';import {Character} from './character.js?v=premium-outfit-1';import {Input} from './input.js';import {AudioEngine} from './audio.js?v=vitty132-1';import {Run,SPB,DURATION,zones,zoneAt} from './course.js';import {read,save} from './save.js';
 const $=s=>document.querySelector(s),world=new World($('#scene')),hero=new Character(world.scene),audio=new AudioEngine();let state='loading',run=new Run(),last=0,menuBeat=0,generation=0,toastUntil=0,frames=[],autoTime=0,audioRecoveryPending=false,silenceSince=0,lastSilentAlert=0;
 const prefs={quality:'auto',control:'lanes',reduced:true,volume:.8,distance:8.3,zen:false,...read().settings};
 const input=new Input($('#scene'),x=>run.target=x,()=>pause());
 const tg=window.Telegram?.WebApp;try{tg?.ready();tg?.expand();tg?.setHeaderColor('#07091a');tg?.setBackgroundColor('#07091a');tg?.disableVerticalSwipes?.();tg?.onEvent('deactivated',()=>pause());tg?.BackButton?.onClick(()=>pause());}catch{}
 function apply(){world.quality(prefs.quality);world.reduced=prefs.reduced;world.distance=+prefs.distance;input.mode=prefs.control;audio.setVolume(+prefs.volume,.32);save({settings:prefs});}
-function screen(name){for(const s of ['menu','paused','results','dialog'])$('#'+s).hidden=s!==name;const playing=name===null;$('#track-label').hidden=!playing;$('#hud').hidden=!playing;$('#pause').hidden=!playing;$('#zone').hidden=!playing;document.body.classList.toggle('playing',playing);input.enabled=playing;}
+function screen(name){for(const s of ['menu','paused','results','dialog'])$('#'+s).hidden=s!==name;const playing=name===null;$('#hud').hidden=!playing;$('#pause').hidden=!playing;$('#zone').hidden=!playing;document.body.classList.toggle('playing',playing);input.enabled=playing;}
 function toast(text,duration=1.3){$('#toast').textContent=text;toastUntil=performance.now()+duration*1000;}
-async function start(resume=false){const token=++generation;state='loading';$('#play').disabled=true;$('#resume').disabled=true;try{await audio.unlock();await audio.load();if(token!==generation)return;if(!resume){hero.result=null;run=new Run(prefs.zen);world.reset();input.reset();}$('#track-label').textContent='♫ '+audio.meta.title;audio.start(resume?audio.offset:0);state='countdown';screen(null);input.enabled=true;$('#load').textContent='';}catch(e){state='menu';screen('menu');$('#load').textContent=e.message;}finally{$('#play').disabled=false;$('#resume').disabled=false;}}
+async function start(resume=false){const token=++generation;state='loading';$('#play').disabled=true;$('#resume').disabled=true;try{await audio.unlock();await audio.load();if(token!==generation)return;if(!resume){hero.result=null;run=new Run(prefs.zen);world.reset();input.reset();}audio.start(resume?audio.offset:0);state='countdown';screen(null);input.enabled=true;$('#load').textContent='';}catch(e){state='menu';screen('menu');$('#load').textContent=e.message;}finally{$('#play').disabled=false;$('#resume').disabled=false;}}
 function pause(reason='manual'){
  if(!['running','countdown'].includes(state))return;
  audio.pause();generation++;state='paused';screen('paused');$('#toast').textContent='';
@@ -34,7 +34,12 @@ $('#scene').addEventListener('pointerdown',()=>{
 $('#scene').addEventListener('webglcontextlost',e=>{e.preventDefault();pause();$('#fatal').hidden=false;$('#fatal p').textContent='Графическая система приостановлена. Перезагрузи игру — рекорд сохранён.';});
 function frame(now){requestAnimationFrame(frame);const dt=Math.min(.05,last?(now-last)/1000:0);last=now;let beat=run.beat,hit=false;
  if(state==='countdown'){const remain=audio.remainingCountIn();if(remain>0)toast(String(Math.ceil(remain/SPB)),.2);else{state='running';toast('ПОЙМАЙ РИТМ');}}
- if(state==='running'){beat=audio.beat();run.update(beat,dt);for(const f of run.feedback.splice(0)){audio.sound(f.type);world.burst(f.x,f.type==='hit');if(f.type==='hit'){hit=true;toast('ДЕРЖИ РИТМ');}else if(f.type==='shield')toast('ЩИТ');else if(run.combo%8===0)toast('RAVE COMBO ×'+run.multiplier);try{tg?.HapticFeedback?.impactOccurred?.(f.type==='hit'?'medium':'light');}catch{}}
+ if(state==='running'){beat=audio.beat();run.update(beat,dt);for(const f of run.feedback.splice(0)){audio.sound(f.type);world.burst(f.x,f.type==='hit');if(f.type==='hit'){hit=true;toast('ДЕРЖИ РИТМ');}
+   else if(f.type==='dancer')toast('RAVE GIRL +300');
+   else if(f.type==='bottle')toast('WHISKY +200');
+   else if(f.type==='cash')toast('DOLLAR ROLL +250');
+   else if(f.type==='shield')toast('ЩИТ');
+   else if(run.combo%8===0)toast('RAVE COMBO ×'+run.multiplier);try{tg?.HapticFeedback?.impactOccurred?.(f.type==='hit'?'medium':'light');}catch{}}
  $('#score').textContent=String(Math.round(run.score)).padStart(6,'0');$('#combo').textContent='×'+run.multiplier;$('#health').textContent='♥ '.repeat(Math.max(0,run.health))+(run.shield?' ◇':'');$('#zone span').textContent=zones[zoneAt(beat)].name;$('#progress i').style.width=(beat/DURATION*100)+'%';if(run.done)finish();
  }else if(state==='menu'||state==='loading'){menuBeat+=dt*.6;beat=menuBeat;}
  if(['running','countdown'].includes(state)&&audio.context&&audio.context.state!=='running'){
