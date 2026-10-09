@@ -431,9 +431,38 @@ for(const side of [-1,1]){
   band.add(mesh(new THREE.TorusGeometry(.17,.04,5,14),glowTrim,0,-.43,0,Math.PI/2));
   forearms[i].add(band);bracelets.push(band);
  }
+ // Silhouette upgrades: four distinctive hairstyles and animated skirt panels.
+ const skirtPanels=[];
+ if(variant===0||variant===3){
+  const skirtMat=new THREE.MeshStandardMaterial({color:variant===0?0xd32c9b:0x6532c2,metalness:.35,roughness:.38,side:THREE.DoubleSide});
+  for(let i=0;i<6;i++){
+   const a=i*Math.PI/3,panel=new THREE.Group();
+   panel.position.set(Math.sin(a)*.27,-.44,Math.cos(a)*.21);
+   panel.rotation.y=a;
+   const fabric=mesh(new THREE.PlaneGeometry(.31,.51),skirtMat,0,-.24,0);
+   fabric.rotation.x=-.23;panel.add(fabric);
+   panel.add(mesh(new THREE.BoxGeometry(.25,.035,.025),glowTrim,0,-.46,-.005));
+   hips.add(panel);skirtPanels.push(panel);
+  }
+ }
+ if(variant===1){
+  // High twin ponytails with luminous ties.
+  for(const side of [-1,1]){
+   const pony=mesh(new THREE.CapsuleGeometry(.13,.62,4,7),hairMat,side*.32,.31,.18);
+   pony.rotation.z=side*.62;headPivot.add(pony);
+   headPivot.add(mesh(new THREE.TorusGeometry(.12,.035,5,12),glowTrim,side*.31,.48,.16,Math.PI/2));
+  }
+ }else if(variant===2){
+  const crown=mesh(new THREE.TorusGeometry(.34,.04,6,20),glowTrim,0,.57,0,Math.PI/2);
+  headPivot.add(crown);
+ }
+ // Readable stage spotlight glow around the pickup, without adding realtime lights.
+ const backGlow=new THREE.MeshBasicMaterial({color,transparent:true,opacity:.14,depthWrite:false,side:THREE.DoubleSide,blending:THREE.AdditiveBlending});
+ const aura=mesh(new THREE.CircleGeometry(.92,24),backGlow,0,.15,.48);
+ dancer.add(aura);
  const halo=mesh(new THREE.TorusGeometry(.95,.06,6,24),neon,0,-1.7,0,Math.PI/2);dancer.add(halo);
  dancer.scale.setScalar(1.8);
- dancer.userData={arms,forearms,legs,shins,headPivot,torso,hips,halo,ribbons,bracelets,glowTrim,style:variant};
+ dancer.userData={arms,forearms,legs,shins,headPivot,torso,hips,halo,ribbons,bracelets,glowTrim,skirtPanels,aura,backGlow,style:variant};
  return dancer;
 }
 function makeWhiskyBottle(){
@@ -528,6 +557,28 @@ for(let i=0;i<wallPanels.length;i++)wallPanels[i].position.z=12-(((i*12-tunnelDi
 for(let i=0;i<clubDecor.length;i++)clubDecor[i].position.z=12-(((i*16-tunnelDistance)%(clubDecor.length*16)+(clubDecor.length*16))%(clubDecor.length*16));
 for(const item of laserBeams){const fixture=item.pivot;fixture.position.z=12-(((item.index*16+6-tunnelDistance)%(laserBeams.length*16)+(laserBeams.length*16))%(laserBeams.length*16));fixture.rotation.z=item.side*(.25+Math.sin(rhythmTime*1.2+item.index*.8)*.35);fixture.rotation.x=Math.sin(rhythmTime*.9+item.index)*.18;}
 laserMaterialA.opacity=.32+beatPulse*.52;laserMaterialB.opacity=.22+beatPulse*.6;
-for(let i=0;i<waveRings.length;i++){const w=waveRings[i];w.position.z=10-(((i*30+18-tunnelDistance)%(waveRings.length*30)+(waveRings.length*30))%(waveRings.length*30));const pulse=1+beatPulse*.09;w.scale.set(pulse,pulse,1);w.material.opacity=.16+beatPulse*.55;}for(let i=0;i<starPositions.length;i+=3){starPositions[i+2]+=dt*speed*.7;if(starPositions[i+2]>12)starPositions[i+2]-=190;}starGeometry.attributes.position.needsUpdate=true;ship.position.x=THREE.MathUtils.damp(ship.position.x,desiredX,8.5,dt);ship.rotation.z=THREE.MathUtils.damp(ship.rotation.z,THREE.MathUtils.clamp(-(desiredX-ship.position.x)*.15,-.3,.3),7,dt);ship.rotation.y=THREE.MathUtils.damp(ship.rotation.y,THREE.MathUtils.clamp(-(desiredX-ship.position.x)*.12,-.25,.25),7,dt);ship.position.y=-2.1+Math.sin(elapsed*3.5)*.07;ship.position.z=1.1;shipGlow.intensity=7+Math.pow(beatPulse,3)*10;flame.scale.y=1+Math.sin(elapsed*40)*.14;invulnerable=Math.max(0,invulnerable-dt);ship.visible=invulnerable===0||Math.sin(elapsed*28)>0;for(let i=objects.length-1;i>=0;i--){const o=objects[i];o.mesh.position.z=collisionZ+(rhythmTime>=o.arrivalBeat?distanceBetween(o.arrivalBeat,rhythmTime):-distanceBetween(rhythmTime,o.arrivalBeat));if(o.gem&&!o.dancer){o.mesh.rotation.y+=dt*1.4;o.mesh.position.y=-2.05+Math.sin(rhythmTime*4+o.arrivalBeat)*.18;}if(o.gem&&o.dancer){const d=o.dancer.userData;const phase=rhythmTime*Math.PI*2/beat;const motion=phase+(d.style*1.7);d.arms[0].rotation.z=d.style===0?-1.8+Math.sin(motion)*.3:d.style===1?Math.sin(motion)*1.3-.8:-1.3+Math.sin(motion*2)*.7;d.arms[1].rotation.z=d.style===0?1.8+Math.cos(motion)*.3:d.style===1?-Math.sin(motion+1.1)*1.3+.8:1.3-Math.cos(motion*2)*.7;d.arms[0].rotation.x=Math.cos(motion)*.5;d.arms[1].rotation.x=-Math.cos(motion)*.5;d.legs[0].rotation.x=Math.sin(motion)*(d.style===2?.85:.55);d.legs[1].rotation.x=-Math.sin(motion)*(d.style===2?.85:.55);o.dancer.position.y=Math.abs(Math.sin(motion))*.22;o.dancer.rotation.y=Math.sin(motion*.5)*.24;d.torso.rotation.z=Math.sin(motion*.5)*.3;d.torso.rotation.x=Math.sin(motion)*.16;d.headPivot.rotation.y=Math.sin(motion*.75)*.48;d.hips.rotation.y=Math.sin(motion*.5)*.32;d.forearms[0].rotation.z=-.6+Math.sin(motion*1.3)*.7;d.forearms[1].rotation.z=.6-Math.cos(motion*1.3)*.7;d.shins[0].rotation.x=Math.max(0,Math.sin(motion))*.6;d.shins[1].rotation.x=Math.max(0,-Math.sin(motion))*.6;d.halo.rotation.z+=dt*.65;d.headPivot.rotation.z=Math.sin(motion*.65)*.12;for(let i=0;i<d.ribbons.length;i++){d.ribbons[i].rotation.z=Math.sin(motion*.72-i*.9)*.24;d.ribbons[i].rotation.x=Math.cos(motion*.65+i)*.19;}d.glowTrim.opacity=.65+beatPulse*.3;}else if(!o.gem&&o.mesh.children.length)o.mesh.rotation.z=Math.sin(rhythmTime*2+o.arrivalBeat)*.12;if(!o.gem&&!o.passed&&o.arrivalBeat-rhythmTime>0&&o.arrivalBeat-rhythmTime<.55&&Math.abs(o.mesh.position.x-ship.position.x)<o.r+.6)warningFlash=Math.max(warningFlash,1-(o.arrivalBeat-rhythmTime)/.55);if(!o.passed&&rhythmTime>=o.arrivalBeat){o.passed=true;if(Math.abs(o.mesh.position.x-ship.position.x)<o.r+(o.gem?1.25:.6)){if(o.gem){spawnPickupBurst(o.mesh.position.x,o.mesh.position.y,o.mesh.position.z,o.collectibleType);streak++;score+=100*multiplier();combo+=2;if(streak>0&&streak%10===0){score+=500;trackLabel('RAVE COMBO +500');}trackLabel(o.collectibleType==='whisky'?'✦ +100 ВИСКИ':o.collectibleType==='dollars'?'✦ +100 ДОЛЛАРЫ':'✦ +100 РЕЙВЕР');setTimeout(()=>{if(running)trackLabel(track.paused?'♫ ВКЛЮЧИТЬ ТРЕК':'♫ VITTY ИГРАЕТ');},850);impactFlash=Math.max(impactFlash,.24);tg?.HapticFeedback?.selectionChanged?.();}else if(invulnerable<=0){health--;combo=0;streak=0;invulnerable=1.5;impactFlash=1;cameraShake=.3;tg?.HapticFeedback?.impactOccurred?.('medium');if(health<=0){finish();break;}}}else if(!o.gem){streak++;combo++;score+=10*multiplier();}updateHud();}if(o.mesh.position.z>18){scene.remove(o.mesh);o.mesh.traverse(n=>{if(n.geometry)n.geometry.dispose();});objects.splice(i,1);}}}
+for(let i=0;i<waveRings.length;i++){const w=waveRings[i];w.position.z=10-(((i*30+18-tunnelDistance)%(waveRings.length*30)+(waveRings.length*30))%(waveRings.length*30));const pulse=1+beatPulse*.09;w.scale.set(pulse,pulse,1);w.material.opacity=.16+beatPulse*.55;}for(let i=0;i<starPositions.length;i+=3){starPositions[i+2]+=dt*speed*.7;if(starPositions[i+2]>12)starPositions[i+2]-=190;}starGeometry.attributes.position.needsUpdate=true;ship.position.x=THREE.MathUtils.damp(ship.position.x,desiredX,8.5,dt);ship.rotation.z=THREE.MathUtils.damp(ship.rotation.z,THREE.MathUtils.clamp(-(desiredX-ship.position.x)*.15,-.3,.3),7,dt);ship.rotation.y=THREE.MathUtils.damp(ship.rotation.y,THREE.MathUtils.clamp(-(desiredX-ship.position.x)*.12,-.25,.25),7,dt);ship.position.y=-2.1+Math.sin(elapsed*3.5)*.07;ship.position.z=1.1;shipGlow.intensity=7+Math.pow(beatPulse,3)*10;flame.scale.y=1+Math.sin(elapsed*40)*.14;invulnerable=Math.max(0,invulnerable-dt);ship.visible=invulnerable===0||Math.sin(elapsed*28)>0;for(let i=objects.length-1;i>=0;i--){const o=objects[i];o.mesh.position.z=collisionZ+(rhythmTime>=o.arrivalBeat?distanceBetween(o.arrivalBeat,rhythmTime):-distanceBetween(rhythmTime,o.arrivalBeat));if(o.gem&&!o.dancer){o.mesh.rotation.y+=dt*1.4;o.mesh.position.y=-2.05+Math.sin(rhythmTime*4+o.arrivalBeat)*.18;}if(o.gem&&o.dancer){const d=o.dancer.userData;const phase=rhythmTime*Math.PI*2/beat;const motion=phase+(d.style*1.7);d.arms[0].rotation.z=d.style===0?-1.8+Math.sin(motion)*.3:d.style===1?Math.sin(motion)*1.3-.8:-1.3+Math.sin(motion*2)*.7;d.arms[1].rotation.z=d.style===0?1.8+Math.cos(motion)*.3:d.style===1?-Math.sin(motion+1.1)*1.3+.8:1.3-Math.cos(motion*2)*.7;d.arms[0].rotation.x=Math.cos(motion)*.5;d.arms[1].rotation.x=-Math.cos(motion)*.5;d.legs[0].rotation.x=Math.sin(motion)*(d.style===2?.85:.55);d.legs[1].rotation.x=-Math.sin(motion)*(d.style===2?.85:.55);o.dancer.position.y=Math.abs(Math.sin(motion))*.22;o.dancer.rotation.y=Math.sin(motion*.5)*.24;d.torso.rotation.z=Math.sin(motion*.5)*.3;d.torso.rotation.x=Math.sin(motion)*.16;d.headPivot.rotation.y=Math.sin(motion*.75)*.48;d.hips.rotation.y=Math.sin(motion*.5)*.32;d.forearms[0].rotation.z=-.6+Math.sin(motion*1.3)*.7;d.forearms[1].rotation.z=.6-Math.cos(motion*1.3)*.7;d.shins[0].rotation.x=Math.max(0,Math.sin(motion))*.6;d.shins[1].rotation.x=Math.max(0,-Math.sin(motion))*.6;d.halo.rotation.z+=dt*.65;d.headPivot.rotation.z=Math.sin(motion*.65)*.12;for(let i=0;i<d.ribbons.length;i++){d.ribbons[i].rotation.z=Math.sin(motion*.72-i*.9)*.24;d.ribbons[i].rotation.x=Math.cos(motion*.65+i)*.19;}d.glowTrim.opacity=.65+beatPulse*.3;
+const danceBeat=motion/(Math.PI*2),bar=(danceBeat%4+4)%4;
+if(d.style===0){ // hands-up rave bounce
+ d.arms[0].rotation.z=-2.45+Math.sin(motion)*.2;d.arms[1].rotation.z=2.45-Math.cos(motion)*.2;
+ d.forearms[0].rotation.z=-.4;d.forearms[1].rotation.z=.4;
+ d.torso.rotation.z=Math.sin(motion*.5)*.22;
+}else if(d.style===1){ // side-to-side shuffle
+ d.legs[0].rotation.z=Math.sin(motion)*.32;d.legs[1].rotation.z=-Math.sin(motion)*.32;
+ d.hips.position.x=Math.sin(motion*.5)*.22;
+ d.arms[0].rotation.x=Math.sin(motion+1)*.85;d.arms[1].rotation.x=Math.sin(motion+Math.PI+1)*.85;
+}else if(d.style===2){ // alternating high-knee steps
+ d.legs[0].rotation.x=Math.max(0,Math.sin(motion))*.95;
+ d.legs[1].rotation.x=Math.max(0,-Math.sin(motion))*.95;
+ d.arms[0].rotation.z=-1.1-Math.sin(motion)*.48;
+ d.arms[1].rotation.z=1.1-Math.sin(motion)*.48;
+}else{ // flowing festival dance
+ d.torso.rotation.y=Math.sin(motion*.5)*.38;
+ d.arms[0].rotation.z=-1.7+Math.sin(motion*.5)*.45;
+ d.arms[1].rotation.z=1.7+Math.cos(motion*.5)*.45;
+ d.headPivot.rotation.z=Math.sin(motion*.5+.7)*.22;
+}
+for(let i=0;i<d.skirtPanels.length;i++){d.skirtPanels[i].rotation.x=Math.sin(motion+i*.9)*.13;}
+d.backGlow.opacity=.09+beatPulse*.12;}else if(!o.gem&&o.mesh.children.length)o.mesh.rotation.z=Math.sin(rhythmTime*2+o.arrivalBeat)*.12;if(!o.gem&&!o.passed&&o.arrivalBeat-rhythmTime>0&&o.arrivalBeat-rhythmTime<.55&&Math.abs(o.mesh.position.x-ship.position.x)<o.r+.6)warningFlash=Math.max(warningFlash,1-(o.arrivalBeat-rhythmTime)/.55);if(!o.passed&&rhythmTime>=o.arrivalBeat){o.passed=true;if(Math.abs(o.mesh.position.x-ship.position.x)<o.r+(o.gem?1.25:.6)){if(o.gem){spawnPickupBurst(o.mesh.position.x,o.mesh.position.y,o.mesh.position.z,o.collectibleType);streak++;score+=100*multiplier();combo+=2;if(streak>0&&streak%10===0){score+=500;trackLabel('RAVE COMBO +500');}trackLabel(o.collectibleType==='whisky'?'✦ +100 ВИСКИ':o.collectibleType==='dollars'?'✦ +100 ДОЛЛАРЫ':'✦ +100 РЕЙВЕР');setTimeout(()=>{if(running)trackLabel(track.paused?'♫ ВКЛЮЧИТЬ ТРЕК':'♫ VITTY ИГРАЕТ');},850);impactFlash=Math.max(impactFlash,.24);tg?.HapticFeedback?.selectionChanged?.();}else if(invulnerable<=0){health--;combo=0;streak=0;invulnerable=1.5;impactFlash=1;cameraShake=.3;tg?.HapticFeedback?.impactOccurred?.('medium');if(health<=0){finish();break;}}}else if(!o.gem){streak++;combo++;score+=10*multiplier();}updateHud();}if(o.mesh.position.z>18){scene.remove(o.mesh);o.mesh.traverse(n=>{if(n.geometry)n.geometry.dispose();});objects.splice(i,1);}}}
 updatePickupBursts(active?dt:0);warningFlash=Math.max(0,warningFlash-dt*2.8);impactFlash=Math.max(0,impactFlash-dt*2.6);cameraShake=Math.max(0,cameraShake-dt*.85);impactLight.intensity=impactFlash*75+warningFlash*13;light.intensity=34+Math.pow(beatPulse,5)*42;camera.position.x=THREE.MathUtils.damp(camera.position.x,ship.position.x*.05,2,dt)+(Math.random()-.5)*cameraShake;camera.position.y=1.9+(Math.random()-.5)*cameraShake;if(!contextLost)renderer.render(scene,camera);}
 requestAnimationFrame(animate);
