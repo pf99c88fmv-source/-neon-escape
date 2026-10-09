@@ -18,7 +18,13 @@ const laneGuides=[];for(const x of [-4.4,-2.2,0,2.2,4.4]){const guide=mesh(new T
 const tunnelCore=mesh(new THREE.CylinderGeometry(8.85,8.85,185,8,1,true),new THREE.MeshBasicMaterial({color:0x091333,side:THREE.BackSide,transparent:true,opacity:.22}),0,0,-83,Math.PI/2);scene.add(tunnelCore);
 const ship=new THREE.Group();scene.add(ship);ship.position.set(0,-2.1,3);
 function mesh(geometry,material,x=0,y=0,z=0,rx=0,ry=0,rz=0){const o=new THREE.Mesh(geometry,material);o.position.set(x,y,z);o.rotation.set(rx,ry,rz);return o;}
-ship.add(mesh(new THREE.ConeGeometry(.72,3.6,4),cyan,0,0,-.25,-Math.PI/2,Math.PI/4));ship.add(mesh(new THREE.BoxGeometry(4.2,.16,1.35),dark,0,-.22,.35));ship.add(mesh(new THREE.BoxGeometry(2.2,.18,.85),violet,0,-.11,.1));ship.add(mesh(new THREE.SphereGeometry(.4,12,10),cyan,0,.2,-.3));for(const x of [-1.35,1.35]){ship.add(mesh(new THREE.CylinderGeometry(.32,.46,1.7,8),dark,x,-.23,.75,Math.PI/2));ship.add(mesh(new THREE.SphereGeometry(.28,12,10),cyan,x,-.23,1.65));}
+// Low-poly fighter: forward nose points toward negative Z, with swept wings and twin engines.
+const hull=mesh(new THREE.ConeGeometry(.72,3.5,6),dark,0,0,-.55,-Math.PI/2);ship.add(hull);
+ship.add(mesh(new THREE.BoxGeometry(1.05,.36,2.3),cyan,0,-.04,.25));
+const canopy=mesh(new THREE.SphereGeometry(.47,14,10),violet,0,.32,-.5);canopy.scale.set(.85,.55,1.55);ship.add(canopy);
+function wing(side){const shape=new THREE.Shape();shape.moveTo(.25,-1.1);shape.lineTo(2.35,.85);shape.lineTo(2.4,1.48);shape.lineTo(.25,.9);shape.closePath();const geo=new THREE.ShapeGeometry(shape);const wingMesh=mesh(geo,dark);wingMesh.rotation.x=-Math.PI/2;wingMesh.scale.x=side;wingMesh.position.y=-.19;ship.add(wingMesh);ship.add(mesh(new THREE.BoxGeometry(1.75,.07,.1),cyan,side*1.38,-.16,1.05));}
+wing(1);wing(-1);
+for(const x of [-1.2,1.2]){ship.add(mesh(new THREE.CylinderGeometry(.29,.38,1.7,12),dark,x,-.27,.82,Math.PI/2));ship.add(mesh(new THREE.TorusGeometry(.3,.075,8,16),cyan,x,-.27,1.64));ship.add(mesh(new THREE.SphereGeometry(.22,12,10),cyan,x,-.27,1.7));}
 const flame=mesh(new THREE.ConeGeometry(.4,2.3,12),new THREE.MeshBasicMaterial({color:0x00eaff,transparent:true,opacity:.7}),0,-.22,2.2,Math.PI/2);ship.add(flame);
 const objects=[];let running=false,paused=false,score=0,health=3,combo=0,elapsed=0,last=0,beatIndex=0,spawnBeat=0,invulnerable=0,desiredX=0,desiredY=-2.1,muted=false,audio=null,nextNote=0,note=0;
 const bpm=140,beat=60/bpm;let audioStart=0;let nextSpawnTime=0;let beatPulse=0;let lastBeatVisual=-1;let nextObstacleIndex=0;let runId=0;
