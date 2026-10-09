@@ -1,4 +1,5 @@
 import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.160.1/build/three.module.js';
+import {GLTFLoader} from 'https://cdn.jsdelivr.net/npm/three@0.160.1/examples/jsm/loaders/GLTFLoader.js';
 const tg=window.Telegram?.WebApp;try{tg?.ready();tg?.expand();}catch{}
 const root=document.querySelector('#viewport'),scoreEl=document.querySelector('#score'),comboEl=document.querySelector('#combo'),healthEl=document.querySelector('#health'),screen=document.querySelector('#screen'),message=document.querySelector('#message'),play=document.querySelector('#play'),mute=document.querySelector('#mute');
 const scene=new THREE.Scene();scene.background=new THREE.Color(0x030513);scene.fog=new THREE.FogExp2(0x030513,.007);
