@@ -1,0 +1,1339 @@
+{
+  "schemaVersion": 1,
+  "rulesVersion": 1,
+  "chartId": "makar-zhenya-rave-v1",
+  "status": "playable-release-candidate-v1",
+  "audio": "../audio/neon-rush-140.mp3",
+  "audioSha256": "d3f948b54af7bb197cc2b8b9801752a13b1789852aa321a6ed72ffa6466ef106",
+  "bpm": 140,
+  "beatsPerBar": 4,
+  "firstBeatSeconds": 0,
+  "durationBeats": 128,
+  "sampleRate": 44100,
+  "world": {
+    "width": 360,
+    "height": 600,
+    "playerY": 450,
+    "playerRadius": 7,
+    "maxSpeed": 600
+  },
+  "sections": [
+    {
+      "id": "intro",
+      "startBeat": 0,
+      "endBeat": 16
+    },
+    {
+      "id": "build",
+      "startBeat": 16,
+      "endBeat": 32
+    },
+    {
+      "id": "drop1",
+      "startBeat": 32,
+      "endBeat": 64
+    },
+    {
+      "id": "main",
+      "startBeat": 64,
+      "endBeat": 80
+    },
+    {
+      "id": "break",
+      "startBeat": 80,
+      "endBeat": 96
+    },
+    {
+      "id": "drop2",
+      "startBeat": 96,
+      "endBeat": 112
+    },
+    {
+      "id": "escalation",
+      "startBeat": 112,
+      "endBeat": 128
+    }
+  ],
+  "musicEvents": [
+    {
+      "kind": "kick",
+      "beat": 0,
+      "sample": 0
+    },
+    {
+      "kind": "kick",
+      "beat": 1,
+      "sample": 18900
+    },
+    {
+      "kind": "kick",
+      "beat": 2,
+      "sample": 37800
+    },
+    {
+      "kind": "kick",
+      "beat": 3,
+      "sample": 56700
+    },
+    {
+      "kind": "kick",
+      "beat": 4,
+      "sample": 75600
+    },
+    {
+      "kind": "kick",
+      "beat": 5,
+      "sample": 94500
+    },
+    {
+      "kind": "kick",
+      "beat": 6,
+      "sample": 113400
+    },
+    {
+      "kind": "kick",
+      "beat": 7,
+      "sample": 132300
+    },
+    {
+      "kind": "kick",
+      "beat": 8,
+      "sample": 151200
+    },
+    {
+      "kind": "kick",
+      "beat": 9,
+      "sample": 170100
+    },
+    {
+      "kind": "kick",
+      "beat": 10,
+      "sample": 189000
+    },
+    {
+      "kind": "kick",
+      "beat": 11,
+      "sample": 207900
+    },
+    {
+      "kind": "kick",
+      "beat": 12,
+      "sample": 226800
+    },
+    {
+      "kind": "kick",
+      "beat": 13,
+      "sample": 245700
+    },
+    {
+      "kind": "kick",
+      "beat": 14,
+      "sample": 264600
+    },
+    {
+      "kind": "kick",
+      "beat": 15,
+      "sample": 283500
+    },
+    {
+      "kind": "kick",
+      "beat": 16,
+      "sample": 302400
+    },
+    {
+      "kind": "kick",
+      "beat": 17,
+      "sample": 321300
+    },
+    {
+      "kind": "kick",
+      "beat": 18,
+      "sample": 340200
+    },
+    {
+      "kind": "kick",
+      "beat": 19,
+      "sample": 359100
+    },
+    {
+      "kind": "kick",
+      "beat": 20,
+      "sample": 378000
+    },
+    {
+      "kind": "kick",
+      "beat": 21,
+      "sample": 396900
+    },
+    {
+      "kind": "kick",
+      "beat": 22,
+      "sample": 415800
+    },
+    {
+      "kind": "kick",
+      "beat": 23,
+      "sample": 434700
+    },
+    {
+      "kind": "kick",
+      "beat": 24,
+      "sample": 453600
+    },
+    {
+      "kind": "kick",
+      "beat": 25,
+      "sample": 472500
+    },
+    {
+      "kind": "kick",
+      "beat": 26,
+      "sample": 491400
+    },
+    {
+      "kind": "kick",
+      "beat": 27,
+      "sample": 510300
+    },
+    {
+      "kind": "kick",
+      "beat": 28,
+      "sample": 529200
+    },
+    {
+      "kind": "kick",
+      "beat": 29,
+      "sample": 548100
+    },
+    {
+      "kind": "kick",
+      "beat": 30,
+      "sample": 567000
+    },
+    {
+      "kind": "kick",
+      "beat": 31,
+      "sample": 585900
+    },
+    {
+      "kind": "kick",
+      "beat": 32,
+      "sample": 604800
+    },
+    {
+      "kind": "drop",
+      "beat": 32,
+      "sample": 604800
+    },
+    {
+      "kind": "kick",
+      "beat": 33,
+      "sample": 623700
+    },
+    {
+      "kind": "kick",
+      "beat": 34,
+      "sample": 642600
+    },
+    {
+      "kind": "kick",
+      "beat": 35,
+      "sample": 661500
+    },
+    {
+      "kind": "kick",
+      "beat": 36,
+      "sample": 680400
+    },
+    {
+      "kind": "kick",
+      "beat": 37,
+      "sample": 699300
+    },
+    {
+      "kind": "kick",
+      "beat": 38,
+      "sample": 718200
+    },
+    {
+      "kind": "kick",
+      "beat": 39,
+      "sample": 737100
+    },
+    {
+      "kind": "kick",
+      "beat": 40,
+      "sample": 756000
+    },
+    {
+      "kind": "kick",
+      "beat": 41,
+      "sample": 774900
+    },
+    {
+      "kind": "kick",
+      "beat": 42,
+      "sample": 793800
+    },
+    {
+      "kind": "kick",
+      "beat": 43,
+      "sample": 812700
+    },
+    {
+      "kind": "kick",
+      "beat": 44,
+      "sample": 831600
+    },
+    {
+      "kind": "kick",
+      "beat": 45,
+      "sample": 850500
+    },
+    {
+      "kind": "kick",
+      "beat": 46,
+      "sample": 869400
+    },
+    {
+      "kind": "kick",
+      "beat": 47,
+      "sample": 888300
+    },
+    {
+      "kind": "kick",
+      "beat": 48,
+      "sample": 907200
+    },
+    {
+      "kind": "kick",
+      "beat": 49,
+      "sample": 926100
+    },
+    {
+      "kind": "kick",
+      "beat": 50,
+      "sample": 945000
+    },
+    {
+      "kind": "kick",
+      "beat": 51,
+      "sample": 963900
+    },
+    {
+      "kind": "kick",
+      "beat": 52,
+      "sample": 982800
+    },
+    {
+      "kind": "kick",
+      "beat": 53,
+      "sample": 1001700
+    },
+    {
+      "kind": "kick",
+      "beat": 54,
+      "sample": 1020600
+    },
+    {
+      "kind": "kick",
+      "beat": 55,
+      "sample": 1039500
+    },
+    {
+      "kind": "kick",
+      "beat": 56,
+      "sample": 1058400
+    },
+    {
+      "kind": "kick",
+      "beat": 57,
+      "sample": 1077300
+    },
+    {
+      "kind": "kick",
+      "beat": 58,
+      "sample": 1096200
+    },
+    {
+      "kind": "kick",
+      "beat": 59,
+      "sample": 1115100
+    },
+    {
+      "kind": "kick",
+      "beat": 60,
+      "sample": 1134000
+    },
+    {
+      "kind": "kick",
+      "beat": 61,
+      "sample": 1152900
+    },
+    {
+      "kind": "kick",
+      "beat": 62,
+      "sample": 1171800
+    },
+    {
+      "kind": "kick",
+      "beat": 63,
+      "sample": 1190700
+    },
+    {
+      "kind": "kick",
+      "beat": 64,
+      "sample": 1209600
+    },
+    {
+      "kind": "kick",
+      "beat": 65,
+      "sample": 1228500
+    },
+    {
+      "kind": "kick",
+      "beat": 66,
+      "sample": 1247400
+    },
+    {
+      "kind": "kick",
+      "beat": 67,
+      "sample": 1266300
+    },
+    {
+      "kind": "kick",
+      "beat": 68,
+      "sample": 1285200
+    },
+    {
+      "kind": "kick",
+      "beat": 69,
+      "sample": 1304100
+    },
+    {
+      "kind": "kick",
+      "beat": 70,
+      "sample": 1323000
+    },
+    {
+      "kind": "kick",
+      "beat": 71,
+      "sample": 1341900
+    },
+    {
+      "kind": "kick",
+      "beat": 72,
+      "sample": 1360800
+    },
+    {
+      "kind": "kick",
+      "beat": 73,
+      "sample": 1379700
+    },
+    {
+      "kind": "kick",
+      "beat": 74,
+      "sample": 1398600
+    },
+    {
+      "kind": "kick",
+      "beat": 75,
+      "sample": 1417500
+    },
+    {
+      "kind": "kick",
+      "beat": 76,
+      "sample": 1436400
+    },
+    {
+      "kind": "kick",
+      "beat": 77,
+      "sample": 1455300
+    },
+    {
+      "kind": "kick",
+      "beat": 78,
+      "sample": 1474200
+    },
+    {
+      "kind": "kick",
+      "beat": 79,
+      "sample": 1493100
+    },
+    {
+      "kind": "kick",
+      "beat": 88,
+      "sample": 1663200
+    },
+    {
+      "kind": "kick",
+      "beat": 89,
+      "sample": 1682100
+    },
+    {
+      "kind": "kick",
+      "beat": 90,
+      "sample": 1701000
+    },
+    {
+      "kind": "kick",
+      "beat": 91,
+      "sample": 1719900
+    },
+    {
+      "kind": "kick",
+      "beat": 92,
+      "sample": 1738800
+    },
+    {
+      "kind": "kick",
+      "beat": 93,
+      "sample": 1757700
+    },
+    {
+      "kind": "kick",
+      "beat": 94,
+      "sample": 1776600
+    },
+    {
+      "kind": "kick",
+      "beat": 95,
+      "sample": 1795500
+    },
+    {
+      "kind": "kick",
+      "beat": 96,
+      "sample": 1814400
+    },
+    {
+      "kind": "drop",
+      "beat": 96,
+      "sample": 1814400
+    },
+    {
+      "kind": "kick",
+      "beat": 97,
+      "sample": 1833300
+    },
+    {
+      "kind": "kick",
+      "beat": 98,
+      "sample": 1852200
+    },
+    {
+      "kind": "kick",
+      "beat": 99,
+      "sample": 1871100
+    },
+    {
+      "kind": "kick",
+      "beat": 100,
+      "sample": 1890000
+    },
+    {
+      "kind": "kick",
+      "beat": 101,
+      "sample": 1908900
+    },
+    {
+      "kind": "kick",
+      "beat": 102,
+      "sample": 1927800
+    },
+    {
+      "kind": "kick",
+      "beat": 103,
+      "sample": 1946700
+    },
+    {
+      "kind": "kick",
+      "beat": 104,
+      "sample": 1965600
+    },
+    {
+      "kind": "kick",
+      "beat": 105,
+      "sample": 1984500
+    },
+    {
+      "kind": "kick",
+      "beat": 106,
+      "sample": 2003400
+    },
+    {
+      "kind": "kick",
+      "beat": 107,
+      "sample": 2022300
+    },
+    {
+      "kind": "kick",
+      "beat": 108,
+      "sample": 2041200
+    },
+    {
+      "kind": "kick",
+      "beat": 109,
+      "sample": 2060100
+    },
+    {
+      "kind": "kick",
+      "beat": 110,
+      "sample": 2079000
+    },
+    {
+      "kind": "kick",
+      "beat": 111,
+      "sample": 2097900
+    },
+    {
+      "kind": "kick",
+      "beat": 112,
+      "sample": 2116800
+    },
+    {
+      "kind": "escalation",
+      "beat": 112,
+      "sample": 2116800
+    },
+    {
+      "kind": "kick",
+      "beat": 113,
+      "sample": 2135700
+    },
+    {
+      "kind": "kick",
+      "beat": 114,
+      "sample": 2154600
+    },
+    {
+      "kind": "kick",
+      "beat": 115,
+      "sample": 2173500
+    },
+    {
+      "kind": "kick",
+      "beat": 116,
+      "sample": 2192400
+    },
+    {
+      "kind": "kick",
+      "beat": 117,
+      "sample": 2211300
+    },
+    {
+      "kind": "kick",
+      "beat": 118,
+      "sample": 2230200
+    },
+    {
+      "kind": "kick",
+      "beat": 119,
+      "sample": 2249100
+    },
+    {
+      "kind": "kick",
+      "beat": 120,
+      "sample": 2268000
+    },
+    {
+      "kind": "kick",
+      "beat": 121,
+      "sample": 2286900
+    },
+    {
+      "kind": "kick",
+      "beat": 122,
+      "sample": 2305800
+    },
+    {
+      "kind": "kick",
+      "beat": 123,
+      "sample": 2324700
+    },
+    {
+      "kind": "kick",
+      "beat": 124,
+      "sample": 2343600
+    },
+    {
+      "kind": "kick",
+      "beat": 125,
+      "sample": 2362500
+    },
+    {
+      "kind": "kick",
+      "beat": 126,
+      "sample": 2381400
+    },
+    {
+      "kind": "kick",
+      "beat": 127,
+      "sample": 2400300
+    }
+  ],
+  "events": [
+    {
+      "id": "wall-16",
+      "type": "wall",
+      "beat": 16,
+      "approachBeats": 4,
+      "gapCenter": 0.62,
+      "gapWidth": 0.64,
+      "height": 24
+    },
+    {
+      "id": "gate-18",
+      "type": "crossGate",
+      "beat": 18,
+      "x": 0.42,
+      "direction": -1,
+      "risk": false
+    },
+    {
+      "id": "gate-20",
+      "type": "crossGate",
+      "beat": 20,
+      "x": 0.58,
+      "direction": 1,
+      "risk": false
+    },
+    {
+      "id": "wall-20",
+      "type": "wall",
+      "beat": 20,
+      "approachBeats": 4,
+      "gapCenter": 0.38,
+      "gapWidth": 0.64,
+      "height": 24
+    },
+    {
+      "id": "gate-22",
+      "type": "crossGate",
+      "beat": 22,
+      "x": 0.42,
+      "direction": -1,
+      "risk": false
+    },
+    {
+      "id": "gate-24",
+      "type": "crossGate",
+      "beat": 24,
+      "x": 0.58,
+      "direction": 1,
+      "risk": false
+    },
+    {
+      "id": "wall-24",
+      "type": "wall",
+      "beat": 24,
+      "approachBeats": 4,
+      "gapCenter": 0.5,
+      "gapWidth": 0.64,
+      "height": 24
+    },
+    {
+      "id": "gate-26",
+      "type": "crossGate",
+      "beat": 26,
+      "x": 0.42,
+      "direction": -1,
+      "risk": false
+    },
+    {
+      "id": "gate-28",
+      "type": "crossGate",
+      "beat": 28,
+      "x": 0.58,
+      "direction": 1,
+      "risk": false
+    },
+    {
+      "id": "wall-28",
+      "type": "wall",
+      "beat": 28,
+      "approachBeats": 4,
+      "gapCenter": 0.44,
+      "gapWidth": 0.64,
+      "height": 24
+    },
+    {
+      "id": "gate-30",
+      "type": "crossGate",
+      "beat": 30,
+      "x": 0.42,
+      "direction": -1,
+      "risk": false
+    },
+    {
+      "id": "gate-32",
+      "type": "crossGate",
+      "beat": 32,
+      "x": 0.58,
+      "direction": 1,
+      "risk": false
+    },
+    {
+      "id": "wall-32",
+      "type": "wall",
+      "beat": 32,
+      "approachBeats": 4,
+      "gapCenter": 0.56,
+      "gapWidth": 0.64,
+      "height": 24
+    },
+    {
+      "id": "gate-34",
+      "type": "crossGate",
+      "beat": 34,
+      "x": 0.42,
+      "direction": -1,
+      "risk": false
+    },
+    {
+      "id": "gate-36",
+      "type": "crossGate",
+      "beat": 36,
+      "x": 0.58,
+      "direction": 1,
+      "risk": false
+    },
+    {
+      "id": "wall-36",
+      "type": "wall",
+      "beat": 36,
+      "approachBeats": 4,
+      "gapCenter": 0.5,
+      "gapWidth": 0.64,
+      "height": 24
+    },
+    {
+      "id": "gate-38",
+      "type": "crossGate",
+      "beat": 38,
+      "x": 0.42,
+      "direction": -1,
+      "risk": false
+    },
+    {
+      "id": "gate-40",
+      "type": "crossGate",
+      "beat": 40,
+      "x": 0.58,
+      "direction": 1,
+      "risk": false
+    },
+    {
+      "id": "wall-40",
+      "type": "wall",
+      "beat": 40,
+      "approachBeats": 4,
+      "gapCenter": 0.62,
+      "gapWidth": 0.64,
+      "height": 24
+    },
+    {
+      "id": "gate-42",
+      "type": "crossGate",
+      "beat": 42,
+      "x": 0.42,
+      "direction": -1,
+      "risk": false
+    },
+    {
+      "id": "gate-44",
+      "type": "crossGate",
+      "beat": 44,
+      "x": 0.58,
+      "direction": 1,
+      "risk": false
+    },
+    {
+      "id": "wall-44",
+      "type": "wall",
+      "beat": 44,
+      "approachBeats": 4,
+      "gapCenter": 0.38,
+      "gapWidth": 0.64,
+      "height": 24
+    },
+    {
+      "id": "gate-46",
+      "type": "crossGate",
+      "beat": 46,
+      "x": 0.22,
+      "direction": -1,
+      "risk": true,
+      "hazardId": "wall-risk-46"
+    },
+    {
+      "id": "wall-risk-46",
+      "type": "wall",
+      "beat": 46,
+      "approachBeats": 4,
+      "gapCenter": 0.5,
+      "gapWidth": 0.64,
+      "height": 24
+    },
+    {
+      "id": "gate-48",
+      "type": "crossGate",
+      "beat": 48,
+      "x": 0.58,
+      "direction": 1,
+      "risk": false
+    },
+    {
+      "id": "wall-48",
+      "type": "wall",
+      "beat": 48,
+      "approachBeats": 4,
+      "gapCenter": 0.5,
+      "gapWidth": 0.64,
+      "height": 24
+    },
+    {
+      "id": "gate-50",
+      "type": "crossGate",
+      "beat": 50,
+      "x": 0.42,
+      "direction": -1,
+      "risk": false
+    },
+    {
+      "id": "gate-52",
+      "type": "crossGate",
+      "beat": 52,
+      "x": 0.58,
+      "direction": 1,
+      "risk": false
+    },
+    {
+      "id": "wall-52",
+      "type": "wall",
+      "beat": 52,
+      "approachBeats": 4,
+      "gapCenter": 0.44,
+      "gapWidth": 0.64,
+      "height": 24
+    },
+    {
+      "id": "gate-54",
+      "type": "crossGate",
+      "beat": 54,
+      "x": 0.42,
+      "direction": -1,
+      "risk": false
+    },
+    {
+      "id": "gate-56",
+      "type": "crossGate",
+      "beat": 56,
+      "x": 0.58,
+      "direction": 1,
+      "risk": false
+    },
+    {
+      "id": "wall-56",
+      "type": "wall",
+      "beat": 56,
+      "approachBeats": 4,
+      "gapCenter": 0.56,
+      "gapWidth": 0.64,
+      "height": 24
+    },
+    {
+      "id": "gate-58",
+      "type": "crossGate",
+      "beat": 58,
+      "x": 0.42,
+      "direction": -1,
+      "risk": false
+    },
+    {
+      "id": "gate-60",
+      "type": "crossGate",
+      "beat": 60,
+      "x": 0.58,
+      "direction": 1,
+      "risk": false
+    },
+    {
+      "id": "wall-60",
+      "type": "wall",
+      "beat": 60,
+      "approachBeats": 4,
+      "gapCenter": 0.5,
+      "gapWidth": 0.64,
+      "height": 24
+    },
+    {
+      "id": "gate-62",
+      "type": "crossGate",
+      "beat": 62,
+      "x": 0.42,
+      "direction": -1,
+      "risk": false
+    },
+    {
+      "id": "gate-64",
+      "type": "crossGate",
+      "beat": 64,
+      "x": 0.58,
+      "direction": 1,
+      "risk": false
+    },
+    {
+      "id": "wall-64",
+      "type": "wall",
+      "beat": 64,
+      "approachBeats": 4,
+      "gapCenter": 0.62,
+      "gapWidth": 0.64,
+      "height": 24
+    },
+    {
+      "id": "gate-66",
+      "type": "crossGate",
+      "beat": 66,
+      "x": 0.42,
+      "direction": -1,
+      "risk": false
+    },
+    {
+      "id": "gate-68",
+      "type": "crossGate",
+      "beat": 68,
+      "x": 0.58,
+      "direction": 1,
+      "risk": false
+    },
+    {
+      "id": "wall-68",
+      "type": "wall",
+      "beat": 68,
+      "approachBeats": 4,
+      "gapCenter": 0.38,
+      "gapWidth": 0.64,
+      "height": 24
+    },
+    {
+      "id": "gate-70",
+      "type": "crossGate",
+      "beat": 70,
+      "x": 0.42,
+      "direction": -1,
+      "risk": false
+    },
+    {
+      "id": "gate-72",
+      "type": "crossGate",
+      "beat": 72,
+      "x": 0.58,
+      "direction": 1,
+      "risk": false
+    },
+    {
+      "id": "wall-72",
+      "type": "wall",
+      "beat": 72,
+      "approachBeats": 4,
+      "gapCenter": 0.5,
+      "gapWidth": 0.64,
+      "height": 24
+    },
+    {
+      "id": "gate-74",
+      "type": "crossGate",
+      "beat": 74,
+      "x": 0.42,
+      "direction": -1,
+      "risk": false
+    },
+    {
+      "id": "gate-76",
+      "type": "crossGate",
+      "beat": 76,
+      "x": 0.58,
+      "direction": 1,
+      "risk": false
+    },
+    {
+      "id": "wall-76",
+      "type": "wall",
+      "beat": 76,
+      "approachBeats": 4,
+      "gapCenter": 0.44,
+      "gapWidth": 0.64,
+      "height": 24
+    },
+    {
+      "id": "gate-78",
+      "type": "crossGate",
+      "beat": 78,
+      "x": 0.42,
+      "direction": -1,
+      "risk": false
+    },
+    {
+      "id": "gate-88",
+      "type": "crossGate",
+      "beat": 88,
+      "x": 0.58,
+      "direction": 1,
+      "risk": false
+    },
+    {
+      "id": "wall-88",
+      "type": "wall",
+      "beat": 88,
+      "approachBeats": 4,
+      "gapCenter": 0.62,
+      "gapWidth": 0.64,
+      "height": 24
+    },
+    {
+      "id": "gate-90",
+      "type": "crossGate",
+      "beat": 90,
+      "x": 0.42,
+      "direction": -1,
+      "risk": false
+    },
+    {
+      "id": "gate-92",
+      "type": "crossGate",
+      "beat": 92,
+      "x": 0.58,
+      "direction": 1,
+      "risk": false
+    },
+    {
+      "id": "wall-92",
+      "type": "wall",
+      "beat": 92,
+      "approachBeats": 4,
+      "gapCenter": 0.38,
+      "gapWidth": 0.64,
+      "height": 24
+    },
+    {
+      "id": "gate-94",
+      "type": "crossGate",
+      "beat": 94,
+      "x": 0.42,
+      "direction": -1,
+      "risk": false
+    },
+    {
+      "id": "gate-96",
+      "type": "crossGate",
+      "beat": 96,
+      "x": 0.58,
+      "direction": 1,
+      "risk": false
+    },
+    {
+      "id": "wall-96",
+      "type": "wall",
+      "beat": 96,
+      "approachBeats": 4,
+      "gapCenter": 0.5,
+      "gapWidth": 0.64,
+      "height": 24
+    },
+    {
+      "id": "gate-98",
+      "type": "crossGate",
+      "beat": 98,
+      "x": 0.42,
+      "direction": -1,
+      "risk": false
+    },
+    {
+      "id": "gate-100",
+      "type": "crossGate",
+      "beat": 100,
+      "x": 0.58,
+      "direction": 1,
+      "risk": false
+    },
+    {
+      "id": "wall-100",
+      "type": "wall",
+      "beat": 100,
+      "approachBeats": 4,
+      "gapCenter": 0.44,
+      "gapWidth": 0.64,
+      "height": 24
+    },
+    {
+      "id": "gate-102",
+      "type": "crossGate",
+      "beat": 102,
+      "x": 0.42,
+      "direction": -1,
+      "risk": false
+    },
+    {
+      "id": "gate-104",
+      "type": "crossGate",
+      "beat": 104,
+      "x": 0.58,
+      "direction": 1,
+      "risk": false
+    },
+    {
+      "id": "wall-104",
+      "type": "wall",
+      "beat": 104,
+      "approachBeats": 4,
+      "gapCenter": 0.56,
+      "gapWidth": 0.64,
+      "height": 24
+    },
+    {
+      "id": "gate-106",
+      "type": "crossGate",
+      "beat": 106,
+      "x": 0.42,
+      "direction": -1,
+      "risk": false
+    },
+    {
+      "id": "gate-108",
+      "type": "crossGate",
+      "beat": 108,
+      "x": 0.58,
+      "direction": 1,
+      "risk": false
+    },
+    {
+      "id": "wall-108",
+      "type": "wall",
+      "beat": 108,
+      "approachBeats": 4,
+      "gapCenter": 0.5,
+      "gapWidth": 0.64,
+      "height": 24
+    },
+    {
+      "id": "gate-110",
+      "type": "crossGate",
+      "beat": 110,
+      "x": 0.78,
+      "direction": 1,
+      "risk": true,
+      "hazardId": "wall-risk-110"
+    },
+    {
+      "id": "wall-risk-110",
+      "type": "wall",
+      "beat": 110,
+      "approachBeats": 4,
+      "gapCenter": 0.5,
+      "gapWidth": 0.64,
+      "height": 24
+    },
+    {
+      "id": "gate-112",
+      "type": "crossGate",
+      "beat": 112,
+      "x": 0.58,
+      "direction": 1,
+      "risk": false
+    },
+    {
+      "id": "wall-112",
+      "type": "wall",
+      "beat": 112,
+      "approachBeats": 4,
+      "gapCenter": 0.62,
+      "gapWidth": 0.64,
+      "height": 24
+    },
+    {
+      "id": "gate-114",
+      "type": "crossGate",
+      "beat": 114,
+      "x": 0.42,
+      "direction": -1,
+      "risk": false
+    },
+    {
+      "id": "gate-116",
+      "type": "crossGate",
+      "beat": 116,
+      "x": 0.58,
+      "direction": 1,
+      "risk": false
+    },
+    {
+      "id": "wall-116",
+      "type": "wall",
+      "beat": 116,
+      "approachBeats": 4,
+      "gapCenter": 0.38,
+      "gapWidth": 0.64,
+      "height": 24
+    },
+    {
+      "id": "gate-118",
+      "type": "crossGate",
+      "beat": 118,
+      "x": 0.42,
+      "direction": -1,
+      "risk": false
+    },
+    {
+      "id": "gate-120",
+      "type": "crossGate",
+      "beat": 120,
+      "x": 0.58,
+      "direction": 1,
+      "risk": false
+    },
+    {
+      "id": "wall-120",
+      "type": "wall",
+      "beat": 120,
+      "approachBeats": 4,
+      "gapCenter": 0.5,
+      "gapWidth": 0.64,
+      "height": 24
+    },
+    {
+      "id": "gate-122",
+      "type": "crossGate",
+      "beat": 122,
+      "x": 0.42,
+      "direction": -1,
+      "risk": false
+    },
+    {
+      "id": "gate-124",
+      "type": "crossGate",
+      "beat": 124,
+      "x": 0.58,
+      "direction": 1,
+      "risk": false
+    },
+    {
+      "id": "wall-124",
+      "type": "wall",
+      "beat": 124,
+      "approachBeats": 4,
+      "gapCenter": 0.44,
+      "gapWidth": 0.64,
+      "height": 24
+    },
+    {
+      "id": "gate-126",
+      "type": "crossGate",
+      "beat": 126,
+      "x": 0.42,
+      "direction": -1,
+      "risk": false
+    }
+  ],
+  "title": "МАКАР + ЖЕНЯ"
+}
