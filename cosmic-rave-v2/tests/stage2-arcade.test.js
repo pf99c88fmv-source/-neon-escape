@@ -52,7 +52,7 @@ test('user interface features a large title but no persistent song badge',()=>{
  assert.doesNotMatch(html,/id="track-label"/);
  assert.doesNotMatch(app,/#track-label/);
  assert.match(app,/RAVE GIRL \+300/);
- assert.match(app,/WHISKY \+200/);
+ assert.match(app,/BOTTLE \+200/);
  assert.match(app,/DOLLAR ROLL \+250/);
 });
 
