@@ -124,7 +124,7 @@ function spotlightPod(kind,label,dollar){
 }
 export class RaveShow{
  constructor(scene){
-  this.scene=scene;this.dancers=[];this.pods=[];this.ready=false;
+  this.scene=scene;this.dancers=[];this.pods=[];this.ready=false;this.minimal=false;
   const whiskyLabel=canvasTexture('whisky');
   const banknote=canvasTexture('dollar');
   for(const spec of PROP_SLOTS){
@@ -142,6 +142,7 @@ export class RaveShow{
    if(!clip)throw Error('The sample has no dance animation');
    for(const spec of DANCER_SLOTS){
     const stage=pedestal(spec.side<0?0xff55c2:0x38f8f3);
+    stage.visible=!this.minimal;
     this.scene.add(stage);
     const person=cloneSkinned(gltf.scene);
     // Pose first, then normalize bounds: prevents the oversized-boot problem
@@ -179,6 +180,11 @@ export class RaveShow{
    console.warn('Rave dancer GLB unavailable; continuing without optional NPCs:',error);
   }
  }
+ setQuality(preset){
+  this.minimal=preset==='low';
+  for(const d of this.dancers)d.stage.visible=!this.minimal;
+  for(const p of this.pods)p.group.visible=!this.minimal||p.slot%2===0;
+ }
  update(beat,dt,travel){
   const pulse=Math.exp(-(beat%1)*9);
   for(const pod of this.pods){
@@ -189,7 +195,7 @@ export class RaveShow{
   }
   for(const d of this.dancers){
    d.stage.position.set(d.side*DANCER_X,.12,displayZ(d.slot,travel,5.2));
-   d.mixer.update(Math.min(dt,.05));
+   if(d.stage.visible)d.mixer.update(Math.min(dt,.05));
    d.action.timeScale=1.0;
    d.stage.rotation.y=Math.sin(beat*.075+d.slot)*.07;
   }
