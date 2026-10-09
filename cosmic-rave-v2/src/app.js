@@ -1,4 +1,4 @@
-import {World} from './world.js';import {Character} from './character.js';import {Input} from './input.js';import {AudioEngine} from './audio.js?v=vitty132-1';import {Run,SPB,DURATION,zones,zoneAt} from './course.js';import {read,save} from './save.js';
+import {World} from './world.js';import {Character} from './character.js?v=raver-techwear-1';import {Input} from './input.js';import {AudioEngine} from './audio.js?v=vitty132-1';import {Run,SPB,DURATION,zones,zoneAt} from './course.js';import {read,save} from './save.js';
 const $=s=>document.querySelector(s),world=new World($('#scene')),hero=new Character(world.scene),audio=new AudioEngine();let state='loading',run=new Run(),last=0,menuBeat=0,generation=0,toastUntil=0,frames=[],autoTime=0,audioRecoveryPending=false,silenceSince=0,lastSilentAlert=0;
 const prefs={quality:'auto',control:'lanes',reduced:true,volume:.8,distance:8.3,zen:false,...read().settings};
 const input=new Input($('#scene'),x=>run.target=x,()=>pause());
@@ -17,7 +17,7 @@ function finish(){audio.stop();state='results';hero.result=run.health<=0?'Death0
 function dialog(title,html){$('#dialog-title').textContent=title;$('#dialog-body').innerHTML=html;screen('dialog');}
 $('#settings').onclick=()=>{dialog('ТВОЙ РЕЙВ',`<label>Графика<select id="quality">${['auto','low','balanced','ultra'].map(x=>`<option ${x===prefs.quality?'selected':''} value="${x}">${x.toUpperCase()}</option>`).join('')}</select></label><label>Управление<select id="control"><option value="lanes">Дорожки</option><option value="free">Плавное</option></select></label><label>Меньше вспышек<input id="reduced" type="checkbox" ${prefs.reduced?'checked':''}></label><label>Музыка<input id="volume" type="range" min="0" max="1" step=".05" value="${prefs.volume}"></label><label>Камера<input id="distance" type="range" min="7.5" max="11" step=".5" value="${prefs.distance}"></label><label>Без столкновений<input id="zen" type="checkbox" ${prefs.zen?'checked':''}></label>`);$('#control').value=prefs.control;for(const id of ['quality','control','reduced','volume','distance','zen'])$('#'+id).onchange=e=>{prefs[id]=e.target.type==='checkbox'?e.target.checked:e.target.value;apply();};};
 $('#records').onclick=()=>dialog('ТВОЙ РЕКОРД',`<p class="record">${(read().best||0).toLocaleString('ru')} очков</p><p>Рекорд хранится на этом устройстве.<br>Свободный рейв не участвует в зачёте.</p>`);
-$('#character').onclick=()=>dialog('NEON RAVER','<p>Один рейвер, один ритм.<br>Технологичный костюм, скелетная анимация бега и танца.</p><p>Модель и движения: Quaternius · CC0.<br>Новые образы появятся после проверки основного забега.</p>');
+$('#character').onclick=()=>dialog('BLACKLIGHT RAVER','<p>Тёмный клубный техвир, неоновые вставки и наушники.<br>Скелетный бег + танцевальный грув плеч и корпуса под музыку.</p><p>Основа модели и движений: Quaternius · CC0.<br>Дополнительные образы появятся позже.</p>');
 $('#close').onclick=()=>screen('menu');$('#play').onclick=()=>start();$('#again').onclick=()=>start();$('#resume').onclick=()=>start(true);$('#pause').onclick=()=>pause('manual');$('#home').onclick=home;$('#exit').onclick=home;
 // The iPhone browser can dispatch blur when its UI changes or music starts.
 // Blur is not a real pause request; only a genuinely hidden page should pause.
@@ -43,7 +43,7 @@ function frame(now){requestAnimationFrame(frame);const dt=Math.min(.05,last?(now
    toast('НЕТ ЗВУКА · КОСНИСЬ ЭКРАНА',1.6);lastSilentAlert=now;
   }
  }else silenceSince=0;
- if(now>toastUntil)$('#toast').textContent='';if(state!=='paused')hero.update(dt,beat,run.x,state==='running'||state==='countdown',hit);world.update(beat,dt,['menu','loading'].includes(state)?null:run,state==='running');world.render();
+ if(now>toastUntil)$('#toast').textContent='';if(state!=='paused')hero.update(dt,beat,run.x,state==='running'||state==='countdown',hit,run.combo);world.update(beat,dt,['menu','loading'].includes(state)?null:run,state==='running');world.render();
  if(state==='running'&&dt>0){frames.push(dt);autoTime+=dt;if(frames.length>600)frames.shift();if(autoTime>5&&prefs.quality==='auto'){const average=frames.reduce((a,b)=>a+b,0)/frames.length;if(average>.026)world.quality('low');autoTime=0;}}
 }
 apply();requestAnimationFrame(frame);
