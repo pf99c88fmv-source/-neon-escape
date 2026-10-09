@@ -34,7 +34,7 @@ $('#scene').addEventListener('pointerdown',()=>{
 $('#scene').addEventListener('webglcontextlost',e=>{e.preventDefault();pause();$('#fatal').hidden=false;$('#fatal p').textContent='Графическая система приостановлена. Перезагрузи игру — рекорд сохранён.';});
 function frame(now){requestAnimationFrame(frame);const dt=Math.min(.05,last?(now-last)/1000:0);last=now;let beat=run.beat,hit=false;
  if(state==='countdown'){const remain=audio.remainingCountIn();if(remain>0)toast(String(Math.ceil(remain/SPB)),.2);else{state='running';toast('ПОЙМАЙ РИТМ');}}
- if(state==='running'){beat=audio.beat();run.update(beat,dt);for(const f of run.feedback.splice(0)){audio.sound(f.type);world.burst(f.x,f.type==='hit');if(f.type==='hit'){hit=true;toast('ДЕРЖИ РИТМ');}
+ if(state==='running'){beat=audio.beat();run.update(beat,dt);for(const f of run.feedback.splice(0)){audio.sound(f.type);world.burst(f.x,f.type==='hit',f.type);if(f.type==='hit'){hit=true;toast('ДЕРЖИ РИТМ');}
    else if(f.type==='dancer')toast('RAVE GIRL +300');
    else if(f.type==='bottle')toast('WHISKY +200');
    else if(f.type==='cash')toast('DOLLAR ROLL +250');
