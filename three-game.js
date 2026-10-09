@@ -144,80 +144,102 @@ function updateHud(){scoreEl.textContent=String(Math.floor(score)).padStart(6,'0
 // Animated cyber-ravers: separate hips, shoulders, head and limbs for readable silhouettes.
 // Stylized cyberpunk dancers inspired by the neon-rave reference: hair, jackets,
 // articulated limbs, luminous shoes, stage pads, and individually choreographed moves.
+// Procedural mobile-friendly texture artwork for recognizable collectible props.
+function paintedTexture(draw,width=512,height=256){
+ const canvas=document.createElement('canvas');canvas.width=width;canvas.height=height;
+ const c=canvas.getContext('2d');draw(c,width,height);
+ const t=new THREE.CanvasTexture(canvas);t.colorSpace=THREE.SRGBColorSpace;t.anisotropy=Math.min(4,renderer.capabilities.getMaxAnisotropy());return t;
+}
+const bottleLabel=paintedTexture((c,w,h)=>{
+ c.fillStyle='#14100e';c.fillRect(0,0,w,h);
+ c.strokeStyle='#d9a851';c.lineWidth=12;c.strokeRect(18,16,w-36,h-32);
+ c.strokeStyle='#f6d890';c.lineWidth=3;c.strokeRect(32,30,w-64,h-60);
+ c.fillStyle='#f8e4b1';c.textAlign='center';c.font='bold 43px Georgia';c.fillText('OLD RAVE',w/2,88);
+ c.font='bold 68px Georgia';c.fillText('WHISKY',w/2,161);
+ c.font='25px Georgia';c.fillText('NEON CLUB  •  1988',w/2,215);
+});
+const cashTexture=paintedTexture((c,w,h)=>{
+ c.fillStyle='#b2d6a2';c.fillRect(0,0,w,h);
+ c.strokeStyle='#26593d';c.lineWidth=7;c.strokeRect(14,12,w-28,h-24);
+ c.strokeRect(29,26,w-58,h-52);
+ for(let i=0;i<12;i++){c.strokeStyle='rgba(35,92,57,.23)';c.lineWidth=2;c.beginPath();c.moveTo(i*48,0);c.lineTo(i*48-55,h);c.stroke();}
+ c.fillStyle='#24563c';c.textAlign='center';c.font='bold 43px Georgia';c.fillText('100',68,66);c.fillText('100',w-70,h-24);
+ c.beginPath();c.ellipse(w/2,h/2,73,91,0,0,Math.PI*2);c.strokeStyle='#24563c';c.lineWidth=9;c.stroke();
+ c.font='bold 92px Georgia';c.fillText('$',w/2,h/2+30);
+ c.font='bold 23px Georgia';c.fillText('UNITED STATES',w/2,33);
+});
 function makeDancer(index){
  const dancer=new THREE.Group(),variant=Math.floor(index/4)%4;
- const colors=[0x00f4ff,0xff39c7,0xffb62b,0x9c6aff],color=colors[variant];
- const glow=new THREE.MeshBasicMaterial({color}),white=new THREE.MeshBasicMaterial({color:0xd8faff});
- const coat=new THREE.MeshStandardMaterial({color:variant===1?0x401d60:0x101e3b,emissive:color,emissiveIntensity:.36,metalness:.35,roughness:.45});
- const pants=new THREE.MeshStandardMaterial({color:0x12182e,metalness:.3,roughness:.65});
- const skin=new THREE.MeshStandardMaterial({color:variant===2?0x9a604a:0xe4b38f,roughness:.83});
- const hips=new THREE.Group();hips.position.y=.13;dancer.add(hips);
- const torso=new THREE.Group();torso.position.y=.49;hips.add(torso);
- torso.add(mesh(new THREE.BoxGeometry(.76,.8,.42),coat,0,0,0));
- torso.add(mesh(new THREE.BoxGeometry(.14,.72,.45),glow,0,.02,-.02));
+ const palette=[0xff4bd8,0x24eaff,0xffcf66,0xaf79ff],color=palette[variant];
+ const neon=new THREE.MeshBasicMaterial({color}),silver=new THREE.MeshStandardMaterial({color:0xe0e9f4,metalness:.82,roughness:.2});
+ const outfit=new THREE.MeshStandardMaterial({color:variant%2?0x139db6:0xa735a1,metalness:.78,roughness:.25,emissive:color,emissiveIntensity:.18});
+ const skin=new THREE.MeshStandardMaterial({color:variant===2?0x986249:0xe3a47f,roughness:.74});
+ const hairMat=new THREE.MeshStandardMaterial({color:variant%2?0x25131c:0x9b5e2e,metalness:.18,roughness:.65});
+ const hips=new THREE.Group();hips.position.y=.1;dancer.add(hips);
+ const torso=new THREE.Group();torso.position.y=.47;hips.add(torso);
+ torso.add(mesh(new THREE.CylinderGeometry(.27,.37,.68,10),skin,0,0,0));
+ torso.add(mesh(new THREE.CylinderGeometry(.36,.29,.3,10),outfit,0,.2,0));
+ torso.add(mesh(new THREE.TorusGeometry(.27,.038,6,14),silver,0,.34,-.06));
+ torso.add(mesh(new THREE.CylinderGeometry(.4,.37,.22,10),outfit,0,-.37,0));
+ torso.add(mesh(new THREE.BoxGeometry(.7,.09,.3),neon,0,-.32,0));
+ const headPivot=new THREE.Group();headPivot.position.y=.52;torso.add(headPivot);
+ headPivot.add(mesh(new THREE.SphereGeometry(.27,14,10),skin,0,.31,0));
+ headPivot.add(mesh(new THREE.SphereGeometry(.29,12,10),hairMat,0,.51,.08));
+ headPivot.add(mesh(new THREE.BoxGeometry(.6,.15,.13),neon,0,.36,-.25));
+ headPivot.add(mesh(new THREE.BoxGeometry(.23,.11,.08),silver,-.15,.37,-.31));
+ headPivot.add(mesh(new THREE.BoxGeometry(.23,.11,.08),silver,.15,.37,-.31));
  for(const side of [-1,1]){
-  torso.add(mesh(new THREE.BoxGeometry(.13,.82,.5),glow,side*.36,0,-.01));
-  torso.add(mesh(new THREE.BoxGeometry(.17,.22,.53),white,side*.39,.29,0));
- }
- const headPivot=new THREE.Group();headPivot.position.y=.55;torso.add(headPivot);
- headPivot.add(mesh(new THREE.SphereGeometry(.29,12,10),skin,0,.31,0));
- headPivot.add(mesh(new THREE.BoxGeometry(.64,.17,.17),glow,0,.34,-.27));
- // Spiky neon hair or long flowing hair: silhouette is visible even at distance.
- if(variant%2===0){
-  for(let i=-2;i<=2;i++)headPivot.add(mesh(new THREE.ConeGeometry(.13,.47+(.08*Math.abs(i)),6),coat,i*.13,.69,.02,0,0,i*.2));
- }else{
-  headPivot.add(mesh(new THREE.SphereGeometry(.35,10,8),coat,0,.57,.06));
-  for(const side of [-1,1]){const hair=mesh(new THREE.CapsuleGeometry(.13,.55,3,6),glow,side*.32,.1,.09);hair.rotation.z=side*.25;headPivot.add(hair);}
- }
- for(const side of [-1,1]){
-  headPivot.add(mesh(new THREE.CylinderGeometry(.17,.17,.11,10),glow,side*.31,.32,0,0,0,Math.PI/2));
+  const strand=mesh(new THREE.CapsuleGeometry(.115,.63,4,6),hairMat,side*.3,.1,.12);strand.rotation.z=side*.13;headPivot.add(strand);
+  headPivot.add(mesh(new THREE.CylinderGeometry(.16,.16,.09,12),neon,side*.29,.35,.03,0,0,Math.PI/2));
  }
  const arms=[],forearms=[],legs=[],shins=[];
  for(const side of [-1,1]){
-  const arm=new THREE.Group();arm.position.set(side*.47,.29,0);torso.add(arm);
-  arm.add(mesh(new THREE.CylinderGeometry(.17,.14,.53,8),coat,0,-.26,0));
-  const elbow=new THREE.Group();elbow.position.y=-.52;arm.add(elbow);
-  elbow.add(mesh(new THREE.CylinderGeometry(.12,.1,.46,8),coat,0,-.22,0));
-  elbow.add(mesh(new THREE.BoxGeometry(.27,.13,.28),glow,0,-.41,0));
-  elbow.add(mesh(new THREE.SphereGeometry(.12,8,6),skin,0,-.52,0));arms.push(arm);forearms.push(elbow);
-  const leg=new THREE.Group();leg.position.set(side*.22,-.05,0);hips.add(leg);
-  leg.add(mesh(new THREE.CylinderGeometry(.2,.17,.48,8),pants,0,-.25,0));
-  const knee=new THREE.Group();knee.position.y=-.49;leg.add(knee);
-  knee.add(mesh(new THREE.CylinderGeometry(.17,.13,.42,8),pants,0,-.2,0));
-  knee.add(mesh(new THREE.BoxGeometry(.29,.13,.29),glow,0,-.36,0));
-  knee.add(mesh(new THREE.BoxGeometry(.36,.18,.56),white,0,-.46,-.15));legs.push(leg);shins.push(knee);
+  const arm=new THREE.Group();arm.position.set(side*.4,.25,0);torso.add(arm);
+  arm.add(mesh(new THREE.CapsuleGeometry(.115,.37,4,8),skin,0,-.29,0));
+  const elbow=new THREE.Group();elbow.position.y=-.53;arm.add(elbow);
+  elbow.add(mesh(new THREE.CapsuleGeometry(.09,.29,4,8),skin,0,-.21,0));
+  elbow.add(mesh(new THREE.SphereGeometry(.12,8,6),silver,0,-.47,0));arms.push(arm);forearms.push(elbow);
+  const leg=new THREE.Group();leg.position.set(side*.2,-.39,0);hips.add(leg);
+  leg.add(mesh(new THREE.CapsuleGeometry(.17,.39,4,8),skin,0,-.31,0));
+  const knee=new THREE.Group();knee.position.y=-.64;leg.add(knee);
+  knee.add(mesh(new THREE.CylinderGeometry(.18,.16,.59,10),outfit,0,-.32,0));
+  knee.add(mesh(new THREE.BoxGeometry(.34,.17,.52),silver,0,-.64,-.12));
+  knee.add(mesh(new THREE.BoxGeometry(.34,.09,.53),neon,0,-.57,-.13));
+  legs.push(leg);shins.push(knee);
  }
- const pad=mesh(new THREE.CylinderGeometry(.88,.88,.055,24),new THREE.MeshBasicMaterial({color,transparent:true,opacity:.75,depthWrite:false}),0,-.9,0);dancer.add(pad);
- const ring=mesh(new THREE.TorusGeometry(.94,.065,6,24),glow,0,-.86,0,Math.PI/2);dancer.add(ring);
- dancer.scale.setScalar(1.65);
- dancer.userData={arms,forearms,legs,shins,headPivot,torso,hips,halo:ring,style:variant};
+ const halo=mesh(new THREE.TorusGeometry(.95,.06,6,24),neon,0,-1.7,0,Math.PI/2);dancer.add(halo);
+ dancer.scale.setScalar(1.8);
+ dancer.userData={arms,forearms,legs,shins,headPivot,torso,hips,halo,style:variant};
  return dancer;
 }
-// Club-themed collectible props, lightweight enough for mobile WebGL.
 function makeWhiskyBottle(){
  const g=new THREE.Group();
- const amber=new THREE.MeshStandardMaterial({color:0xa95212,transparent:true,opacity:.85,metalness:.2,roughness:.15});
- const label=new THREE.MeshBasicMaterial({color:0xffe2a0});
- const dark=new THREE.MeshStandardMaterial({color:0x171321,metalness:.5,roughness:.35});
- g.add(mesh(new THREE.BoxGeometry(.85,1.4,.55),amber,0,0,0));
- g.add(mesh(new THREE.CylinderGeometry(.19,.24,.52,12),amber,0,.92,0));
- g.add(mesh(new THREE.CylinderGeometry(.23,.23,.2,12),dark,0,1.27,0));
- g.add(mesh(new THREE.BoxGeometry(.72,.72,.025),dark,0,.12,-.3));
- g.add(mesh(new THREE.BoxGeometry(.58,.09,.03),label,0,.32,-.32));
- g.add(mesh(new THREE.BoxGeometry(.5,.08,.03),label,0,.1,-.32));
- g.add(mesh(new THREE.BoxGeometry(.4,.07,.03),label,0,-.12,-.32));
- g.scale.setScalar(1.35);return g;
+ const amber=new THREE.MeshPhysicalMaterial({color:0xb76416,metalness:.06,roughness:.17,transparent:true,opacity:.9,clearcoat:1,clearcoatRoughness:.08});
+ const glassEdge=new THREE.MeshBasicMaterial({color:0xffc15d,transparent:true,opacity:.7});
+ const cap=new THREE.MeshStandardMaterial({color:0x18121c,metalness:.55,roughness:.25});
+ const label=new THREE.MeshBasicMaterial({map:bottleLabel});
+ g.add(mesh(new THREE.BoxGeometry(.92,1.44,.54),amber,0,0,0));
+ g.add(mesh(new THREE.BoxGeometry(.96,.07,.58),glassEdge,0,-.71,0));
+ g.add(mesh(new THREE.CylinderGeometry(.25,.31,.4,12),amber,0,.9,0));
+ g.add(mesh(new THREE.CylinderGeometry(.24,.24,.29,12),cap,0,1.24,0));
+ g.add(mesh(new THREE.PlaneGeometry(.81,.73),label,0,.08,-.285,0,Math.PI,0));
+ for(const x of [-.39,.39])g.add(mesh(new THREE.BoxGeometry(.055,1.29,.06),glassEdge,x,0,-.29));
+ g.scale.setScalar(1.45);return g;
 }
 function makeDollarRoll(){
  const g=new THREE.Group();
- const paper=new THREE.MeshStandardMaterial({color:0x8bcb83,side:THREE.DoubleSide,roughness:.78});
- const edge=new THREE.MeshBasicMaterial({color:0xe0e5b7});
- const darkGreen=new THREE.MeshBasicMaterial({color:0x1a593e});
- const tube=mesh(new THREE.CylinderGeometry(.38,.38,1.38,20,1,true),paper,0,0,0,0,0,Math.PI/2);
- tube.rotation.z=Math.PI/2;g.add(tube);
- for(const x of [-.64,.64]){const rim=mesh(new THREE.TorusGeometry(.38,.06,7,20),edge,x,0,0,0,Math.PI/2);g.add(rim);}
- for(const x of [-.3,.3])g.add(mesh(new THREE.TorusGeometry(.4,.045,6,20),darkGreen,x,0,0,0,Math.PI/2));
- g.rotation.z=-.24;g.scale.setScalar(1.35);return g;
+ const paper=new THREE.MeshStandardMaterial({map:cashTexture,side:THREE.DoubleSide,roughness:.72});
+ const rim=new THREE.MeshBasicMaterial({color:0xcce3af});
+ const rubber=new THREE.MeshBasicMaterial({color:0xdab257});
+ // The banknote cylinder is aligned horizontally; the texture wraps around it.
+ const roll=mesh(new THREE.CylinderGeometry(.43,.43,1.65,28,1,true),paper,0,0,0,0,0,Math.PI/2);
+ g.add(roll);
+ for(const x of [-.82,.82]){
+  g.add(mesh(new THREE.TorusGeometry(.43,.065,8,28),rim,x,0,0,0,Math.PI/2));
+  g.add(mesh(new THREE.TorusGeometry(.26,.05,8,24),rim,x+(x>0?.015:-.015),0,0,0,Math.PI/2));
+ }
+ for(const x of [-.21,.21])g.add(mesh(new THREE.TorusGeometry(.44,.055,8,24),rubber,x,0,0,0,Math.PI/2));
+ g.rotation.z=-.27;g.rotation.y=.35;g.scale.setScalar(1.5);return g;
 }
 function addObstacle(index,arrivalBeat){const patterns=[[0,2,-2,1,-1],[-2,0,2,-1,1],[2,1,0,-1,-2],[0,-2,2,-1,1]];const section=Math.floor(index/16)%patterns.length;const lane=patterns[section][index%5];const isGem=index%4===1;const group=new THREE.Group();let hitRadius=.9;let dancer=null;let collectibleType=null;if(isGem){const kind=Math.floor(index/4)%3;collectibleType=kind===0?'raver':kind===1?'whisky':'dollars';if(kind===0){dancer=makeDancer(index);group.add(dancer);hitRadius=1.55;}else if(kind===1){group.add(makeWhiskyBottle());hitRadius=1.2;}else{group.add(makeDollarRoll());hitRadius=1.2;}}else if(index%4===0){group.add(mesh(new THREE.TorusGeometry(1.08,.23,8,8),pink,0,0,0,0,0,Math.PI/8));group.add(mesh(new THREE.OctahedronGeometry(.65,0),violet));hitRadius=1.03;}else if(index%4===1){for(const x of [-.77,.77])group.add(mesh(new THREE.BoxGeometry(.24,2.65,.5),pink,x,0,0));group.add(mesh(new THREE.BoxGeometry(1.75,.24,.55),cyan,0,1.24,0));hitRadius=.98;}else if(index%4===2){group.add(mesh(new THREE.OctahedronGeometry(1.15,0),pink));group.add(mesh(new THREE.TorusGeometry(.86,.07,6,6),cyan));hitRadius=1.02;}else{group.add(mesh(new THREE.BoxGeometry(1.65,2.5,.65),pink));group.add(mesh(new THREE.BoxGeometry(1.9,.12,.85),cyan,0,1.28,0));}group.position.set(lane*2.2,-2.05,-110);scene.add(group);objects.push({mesh:group,gem:isGem,dancer,collectibleType,r:hitRadius,passed:false,arrivalBeat});}
 function finish(){running=false;track.pause();runId++;document.body.classList.remove('running');let saved=0;try{saved=Number(localStorage.getItem('makar-zhenya-3d-best')||0)||0;}catch{}const best=Math.max(score,saved);try{localStorage.setItem('makar-zhenya-3d-best',String(Math.floor(best)));}catch{}message.textContent='Счёт: '+Math.floor(score)+' · Рекорд: '+Math.floor(best)+' · Попробуй ещё раз!';play.textContent='ИГРАТЬ СНОВА →';screen.style.display='flex';if(master&&audio)master.gain.setTargetAtTime(0,audio.currentTime,.035);}
