@@ -46,14 +46,19 @@ export class TunnelArchitecture{
      varying vec2 vUv;uniform float uTime,uPulse;uniform vec3 uTint;
      void main(){
       float x=vUv.x-.5, y=vUv.y;
-      float lane=(1.-smoothstep(.005,.028,abs(x-.25)))+
-                 (1.-smoothstep(.005,.028,abs(x+.25)));
-      float wave=pow(max(0.,sin(y*11.-uTime*2.7)),18.);
-      float reflection=exp(-abs(x)*3.5)*(.035+.11*wave);
       float pulse=min(1.,uPulse);
-      vec3 color=uTint*(.22+lane*.44+pulse*.14);
-      float opacity=clamp(lane*.075+reflection*(.48+pulse*.10),0.,.16);
-      gl_FragColor=vec4(color,opacity);
+      // Fine runway guidance, like light embedded under smoked glass.
+      float lane=(1.-smoothstep(.003,.016,abs(x-.25)))+
+                 (1.-smoothstep(.003,.016,abs(x+.25)));
+      float edge=smoothstep(.35,.50,abs(x));
+      float brushed=.5+.5*sin(x*95.+sin(y*17.)*.4);
+      float motion=pow(.5+.5*sin(y*22.-uTime*2.4),15.);
+      float skyline=exp(-abs(x)*2.6)*(.035+.12*motion);
+      float reflection=.028*brushed+.085*motion*(.4+edge);
+      float alpha=clamp(.030+lane*.12+skyline+reflection,0.,.21);
+      vec3 color=uTint*(.17+.37*lane+.17*pulse+.20*motion);
+      color+=vec3(.025,.035,.07)*(1.-edge)*(.3+.7*brushed);
+      gl_FragColor=vec4(color,alpha);
      }`
    }),
    holo:new T.ShaderMaterial({
@@ -201,6 +206,12 @@ export class TunnelArchitecture{
    batch.instanced.instanceMatrix.needsUpdate=true;
   }
   const pulse=Math.exp(-(beat%1)*8);
+  // Smoothly blend reflective-floor and panoramic-panel colors by music
+  // section, independently from the UI and gameplay objects.
+  const palette=[0x247ca8,0x6c47a9,0x249c9a,0x9e4f90];
+  const idx=beat<181?0:beat<362?1:beat<543?2:3;
+  this.materials.floor.uniforms.uTint.value.lerp(new T.Color(palette[idx]),.025);
+  this.materials.holo.uniforms.uTint.value.lerp(new T.Color(palette[idx]),.018);
   this.materials.floor.uniforms.uTime.value=beat;
   this.materials.floor.uniforms.uPulse.value=reduced?pulse*.45:pulse;
   this.materials.holo.uniforms.uTime.value=beat*.45;
