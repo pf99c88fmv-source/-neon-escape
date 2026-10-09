@@ -152,8 +152,8 @@ export class TunnelArchitecture{
   // Lower architectural walls are continuous but layered with regular dark
   // shadow gaps, so light and space read as solid materials, not wireframes.
   for(const side of [-1,1]){
-   this.add(i,'block','graphite',[side*6.42,1.81,zMid],[1.32,3.70,FRAME_STEP-.22]);
-   this.add(i,'block','deep',[side*5.79,2.32,zMid],[.12,2.65,FRAME_STEP-.45]);
+   this.add(i,'block','graphite',[side*7.70,2.4,zMid],[.34,4.55,FRAME_STEP-.22]);
+   this.add(i,'block','deep',[side*7.48,2.28,zMid],[.16,2.10,FRAME_STEP-.45]);
    this.add(i,'block','satin',[side*5.74,3.88,zMid],[.21,.23,FRAME_STEP-.80]);
    this.add(i,'block','graphite',[side*7.05,.10,zMid],[2.05,.40,FRAME_STEP-.18]);
    this.add(i,'block','platinum',[side*5.80,.22,zMid],[.16,.20,FRAME_STEP-.25]);
@@ -163,7 +163,7 @@ export class TunnelArchitecture{
     this.add(i,'pane','holo',[side*5.66,2.38,zMid],[FRAME_STEP-1.4,2.16,1],[0,side*Math.PI/2,0]);
     this.add(i,'block',edgeGlow,[side*5.60,3.67,zMid],[.035,.035,FRAME_STEP-2.2]);
    }else{
-    this.add(i,'block','satin',[side*5.63,2.26,zMid],[.13,1.06,FRAME_STEP-1.25]);
+    this.add(i,'block','satin',[side*5.63,4.10,zMid],[.08,.13,FRAME_STEP-1.25]);
    }
    // Double-height vertical facade fins feel like a designed techno venue.
    for(const localZ of [-FRAME_STEP*.39,FRAME_STEP*.39]){
