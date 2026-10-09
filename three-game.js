@@ -460,9 +460,36 @@ for(const side of [-1,1]){
  const backGlow=new THREE.MeshBasicMaterial({color,transparent:true,opacity:.14,depthWrite:false,side:THREE.DoubleSide,blending:THREE.AdditiveBlending});
  const aura=mesh(new THREE.CircleGeometry(.92,24),backGlow,0,.15,.48);
  dancer.add(aura);
+ // v4.9: more recognizable character silhouettes, stage boots and face accessories.
+ const reflective=new THREE.MeshStandardMaterial({color:0xc8faff,metalness:.86,roughness:.14,emissive:color,emissiveIntensity:.12});
+ const darkGlass=new THREE.MeshPhysicalMaterial({color:0x09172c,metalness:.3,roughness:.12,transparent:true,opacity:.9,clearcoat:1});
+ // Fashion glasses: proper frames and two distinct lenses.
+ if(variant===0||variant===3){
+  for(const side of [-1,1]){
+   headPivot.add(mesh(new THREE.BoxGeometry(.19,.11,.045),darkGlass,side*.135,.37,-.322));
+   headPivot.add(mesh(new THREE.TorusGeometry(.102,.015,5,12),reflective,side*.135,.37,-.347));
+  }
+  headPivot.add(mesh(new THREE.BoxGeometry(.085,.02,.04),reflective,0,.39,-.344));
+ }
+ // Chest armor details and LED panels with a readable front-facing silhouette.
+ torso.add(mesh(new THREE.BoxGeometry(.27,.12,.045),reflective,0,.13,-.37));
+ for(const side of [-1,1]){
+  torso.add(mesh(new THREE.BoxGeometry(.13,.21,.055),glowTrim,side*.21,.06,-.355,0,0,side*.2));
+  const boot=shins[side===-1?0:1];
+  boot.add(mesh(new THREE.BoxGeometry(.33,.22,.4),outfit,0,-.65,-.12));
+  boot.add(mesh(new THREE.BoxGeometry(.31,.065,.48),reflective,0,-.76,-.16));
+  boot.add(mesh(new THREE.BoxGeometry(.075,.34,.06),glowTrim,0,-.4,-.195));
+ }
+ // Small holographic geometric ornaments; dance in time with the performer.
+ const ornaments=[];
+ for(let i=0;i<3;i++){
+  const orbit=new THREE.Group();orbit.rotation.y=i*Math.PI*2/3;
+  const gem=mesh(new THREE.OctahedronGeometry(.105,0),i%2?reflective:neon,.74,0,0);
+  orbit.add(gem);orbit.position.y=-.08;dancer.add(orbit);ornaments.push(orbit);
+ }
  const halo=mesh(new THREE.TorusGeometry(.95,.06,6,24),neon,0,-1.7,0,Math.PI/2);dancer.add(halo);
  dancer.scale.setScalar(1.8);
- dancer.userData={arms,forearms,legs,shins,headPivot,torso,hips,halo,ribbons,bracelets,glowTrim,skirtPanels,aura,backGlow,style:variant};
+ dancer.userData={arms,forearms,legs,shins,headPivot,torso,hips,halo,ribbons,bracelets,glowTrim,skirtPanels,aura,backGlow,ornaments,style:variant};
  return dancer;
 }
 function makeWhiskyBottle(){
@@ -579,6 +606,6 @@ if(d.style===0){ // hands-up rave bounce
  d.headPivot.rotation.z=Math.sin(motion*.5+.7)*.22;
 }
 for(let i=0;i<d.skirtPanels.length;i++){d.skirtPanels[i].rotation.x=Math.sin(motion+i*.9)*.13;}
-d.backGlow.opacity=.09+beatPulse*.12;}else if(!o.gem&&o.mesh.children.length)o.mesh.rotation.z=Math.sin(rhythmTime*2+o.arrivalBeat)*.12;if(!o.gem&&!o.passed&&o.arrivalBeat-rhythmTime>0&&o.arrivalBeat-rhythmTime<.55&&Math.abs(o.mesh.position.x-ship.position.x)<o.r+.6)warningFlash=Math.max(warningFlash,1-(o.arrivalBeat-rhythmTime)/.55);if(!o.passed&&rhythmTime>=o.arrivalBeat){o.passed=true;if(Math.abs(o.mesh.position.x-ship.position.x)<o.r+(o.gem?1.25:.6)){if(o.gem){spawnPickupBurst(o.mesh.position.x,o.mesh.position.y,o.mesh.position.z,o.collectibleType);streak++;score+=100*multiplier();combo+=2;if(streak>0&&streak%10===0){score+=500;trackLabel('RAVE COMBO +500');}trackLabel(o.collectibleType==='whisky'?'✦ +100 ВИСКИ':o.collectibleType==='dollars'?'✦ +100 ДОЛЛАРЫ':'✦ +100 РЕЙВЕР');setTimeout(()=>{if(running)trackLabel(track.paused?'♫ ВКЛЮЧИТЬ ТРЕК':'♫ VITTY ИГРАЕТ');},850);impactFlash=Math.max(impactFlash,.24);tg?.HapticFeedback?.selectionChanged?.();}else if(invulnerable<=0){health--;combo=0;streak=0;invulnerable=1.5;impactFlash=1;cameraShake=.3;tg?.HapticFeedback?.impactOccurred?.('medium');if(health<=0){finish();break;}}}else if(!o.gem){streak++;combo++;score+=10*multiplier();}updateHud();}if(o.mesh.position.z>18){scene.remove(o.mesh);o.mesh.traverse(n=>{if(n.geometry)n.geometry.dispose();});objects.splice(i,1);}}}
+d.backGlow.opacity=.09+beatPulse*.12;for(let i=0;i<d.ornaments.length;i++){d.ornaments[i].rotation.y+=dt*(.55+i*.2);d.ornaments[i].position.y=-.08+Math.sin(motion+i*2.1)*.12;}}else if(!o.gem&&o.mesh.children.length)o.mesh.rotation.z=Math.sin(rhythmTime*2+o.arrivalBeat)*.12;if(!o.gem&&!o.passed&&o.arrivalBeat-rhythmTime>0&&o.arrivalBeat-rhythmTime<.55&&Math.abs(o.mesh.position.x-ship.position.x)<o.r+.6)warningFlash=Math.max(warningFlash,1-(o.arrivalBeat-rhythmTime)/.55);if(!o.passed&&rhythmTime>=o.arrivalBeat){o.passed=true;if(Math.abs(o.mesh.position.x-ship.position.x)<o.r+(o.gem?1.25:.6)){if(o.gem){spawnPickupBurst(o.mesh.position.x,o.mesh.position.y,o.mesh.position.z,o.collectibleType);streak++;score+=100*multiplier();combo+=2;if(streak>0&&streak%10===0){score+=500;trackLabel('RAVE COMBO +500');}trackLabel(o.collectibleType==='whisky'?'✦ +100 ВИСКИ':o.collectibleType==='dollars'?'✦ +100 ДОЛЛАРЫ':'✦ +100 РЕЙВЕР');setTimeout(()=>{if(running)trackLabel(track.paused?'♫ ВКЛЮЧИТЬ ТРЕК':'♫ VITTY ИГРАЕТ');},850);impactFlash=Math.max(impactFlash,.24);tg?.HapticFeedback?.selectionChanged?.();}else if(invulnerable<=0){health--;combo=0;streak=0;invulnerable=1.5;impactFlash=1;cameraShake=.3;tg?.HapticFeedback?.impactOccurred?.('medium');if(health<=0){finish();break;}}}else if(!o.gem){streak++;combo++;score+=10*multiplier();}updateHud();}if(o.mesh.position.z>18){scene.remove(o.mesh);o.mesh.traverse(n=>{if(n.geometry)n.geometry.dispose();});objects.splice(i,1);}}}
 updatePickupBursts(active?dt:0);warningFlash=Math.max(0,warningFlash-dt*2.8);impactFlash=Math.max(0,impactFlash-dt*2.6);cameraShake=Math.max(0,cameraShake-dt*.85);impactLight.intensity=impactFlash*75+warningFlash*13;light.intensity=34+Math.pow(beatPulse,5)*42;camera.position.x=THREE.MathUtils.damp(camera.position.x,ship.position.x*.05,2,dt)+(Math.random()-.5)*cameraShake;camera.position.y=1.9+(Math.random()-.5)*cameraShake;if(!contextLost)renderer.render(scene,camera);}
 requestAnimationFrame(animate);
