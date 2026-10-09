@@ -14,7 +14,12 @@ export function styleRaverMaterial(source,T){
   shader.fragmentShader=shader.fragmentShader
    .replace('#include <common>','#include <common>\nvarying vec3 vRavePosition;')
    .replace('#include <map_fragment>',`#include <map_fragment>
-    // Style the existing skinned mesh as charcoal techwear with club highlights.
+    // Recolor the original blue superhero suit directly via its texture
+    // hue; preserve warm skin tones, face and hair on the shared rig.
+    float blueSuit=smoothstep(.035,.18,diffuseColor.b-diffuseColor.r)
+      *smoothstep(.015,.11,diffuseColor.g-diffuseColor.r);
+    diffuseColor.rgb=mix(diffuseColor.rgb,vec3(.016,.021,.032),blueSuit*.93);
+    // Precise techwear cuts and accents follow original mesh coordinates.
     float y=vRavePosition.y;
     float x=abs(vRavePosition.x);
     float jacket=smoothstep(.86,.97,y)*(1.-smoothstep(1.40,1.50,y))
@@ -44,7 +49,7 @@ export function styleRaverMaterial(source,T){
     totalEmissiveRadiance+=cyanColor*cyan*.22+pinkColor*pink*.14;
 `);
  };
- material.customProgramCacheKey=()=> 'cosmic-rave-techwear-3-matte';
+ material.customProgramCacheKey=()=> 'cosmic-rave-techwear-4-suit-tone';
  material.needsUpdate=true;
  return material;
 }
