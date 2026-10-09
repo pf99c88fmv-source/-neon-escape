@@ -2,15 +2,13 @@ name: Publish Cosmic Rave Mini App
 on:
   push:
     branches: [main]
-    paths:
-      - '.github/workflows/publish-cosmic-rave.yml'
   workflow_dispatch:
 permissions:
   contents: read
   pages: write
   id-token: write
 concurrency:
-  group: pages
+  group: cosmic-rave-pages
   cancel-in-progress: true
 jobs:
   deploy:
@@ -19,20 +17,26 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout independent game version
+      - name: Checkout stable site and 3D game
         uses: actions/checkout@v4
         with:
-          ref: feature/cosmic-rave-v2-collectibles-polish
-      - name: Prepare published site
+          ref: main
+      - name: Prepare complete static site
         run: |
           mkdir -p _site
-          cp -a cosmic-rave-v2/. _site/
+          rsync -a --exclude='.git/' --exclude='.github/' --exclude='_site/' --exclude='node_modules/' ./ _site/
           touch _site/.nojekyll
-      - name: Setup Pages
+          test -s _site/index.html
+          test -s _site/cosmic-rave-v2/index.html
+          test -s _site/cosmic-rave-v2/src/app.js
+          test -s _site/cosmic-rave-v2/assets/audio/vitty-track.json
+          test -s _site/makar-zhenya-soundtrack.mp3
+          echo "Stable 3D game and audio asset verified."
+      - name: Configure Pages
         uses: actions/configure-pages@v5
         with:
           enablement: true
-      - name: Upload site
+      - name: Upload complete site
         uses: actions/upload-pages-artifact@v3
         with:
           path: _site
