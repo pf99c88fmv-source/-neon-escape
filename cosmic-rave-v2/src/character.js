@@ -2,7 +2,7 @@ import * as T from 'three';
 import {GLTFLoader} from 'three/addons/loaders/GLTFLoader.js';
 import {SPB,zones} from './course.js';
 import {groovePose,selectRunAnimation} from './raver-motion.js';
-import {styleRaverMaterial,findRigBone,attachClubHeadphones} from './raver-fashion.js';
+import {styleRaverMaterial,findRigBone,attachClubHeadphones} from './raver-fashion.js?v=premium-outfit-1';
 
 export class Character{
  constructor(scene){
