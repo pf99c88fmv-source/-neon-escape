@@ -25,15 +25,18 @@ function pedestal(color=0x25d5ef){
  return g;
 }
 function spotlightPod(kind,labels,dollar,seed=0){
- const g=pedestal(kind==='bottle'?0xffba67:0x6cff9c);
+ // Cash is suspended in the air; a floor pedestal made it look embedded.
+ const g=kind==='cash'?new T.Group():pedestal(0xffba67);
  const type=bottleTypeForEvent(seed);
  const model=kind==='bottle'?makePremiumBottle(type,labels[type]):makeRolledBanknote(dollar,seed);
  if(kind==='bottle'){model.scale.setScalar(1.13);model.position.y=.16;}
- else{model.scale.setScalar(1.20);model.position.y=.28;}
+ else{model.scale.setScalar(1.20);model.position.y=2.18;}
  g.add(model);
- const rim=part(g,new T.TorusGeometry(1.16,.035,5,32),
-  new T.MeshBasicMaterial({color:kind==='bottle'?0xd19c55:0x37f4a9}),0,.12,0);
- rim.rotation.x=Math.PI/2;
+ if(kind!=='cash'){
+  const rim=part(g,new T.TorusGeometry(1.16,.035,5,32),
+   new T.MeshBasicMaterial({color:0xd19c55}),0,.12,0);
+  rim.rotation.x=Math.PI/2;
+ }
  g.userData.animated=model;
  return g;
 }
@@ -105,11 +108,15 @@ export class RaveShow{
   const group=new T.Group();
   group.userData.kind=kind;group.userData.eventId=eventId;
   const highlight=kind==='dancer'?0xff5ecc:kind==='cash'?0x5bfca7:0xffc56b;
-  const base=part(group,new T.CylinderGeometry(.89,.96,.13,24),
-   new T.MeshStandardMaterial({color:0x11192c,metalness:.75,roughness:.28}),0,.11,0);
-  const aura=part(group,new T.TorusGeometry(.9,.052,7,28),
-   new T.MeshBasicMaterial({color:highlight}),0,.2,0);
-  aura.rotation.x=Math.PI/2;
+  // Leave cash fully floating: its ring/pedestal sat at floor level and
+  // visually concealed the rolled banknote. Other pickups keep their stage.
+  if(kind!=='cash'){
+   part(group,new T.CylinderGeometry(.89,.96,.13,24),
+    new T.MeshStandardMaterial({color:0x11192c,metalness:.75,roughness:.28}),0,.11,0);
+   const aura=part(group,new T.TorusGeometry(.9,.052,7,28),
+    new T.MeshBasicMaterial({color:highlight}),0,.2,0);
+   aura.rotation.x=Math.PI/2;
+  }
   if(kind==='bottle'){
    const type=bottleTypeForEvent(eventId);
    group.userData.bottleType=type;
@@ -120,7 +127,10 @@ export class RaveShow{
   }else if(kind==='cash'){
    const item=makeRolledBanknote(this.banknoteTexture,eventId);
    item.scale.setScalar(1.25);
-   item.position.y=.24;
+   // makeRolledBanknote supplies y=1.46 by default. Do not crush the
+   // whole banknote back into the floor by overriding with y=.24.
+   // The tilted tube has nearly one unit of vertical extent.
+   item.position.y=2.20;
    group.add(item);
   }else if(kind==='dancer'){
    // The clear costume-shaped fallback is shown only until the skinned GLB
