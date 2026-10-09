@@ -105,6 +105,22 @@ for(let i=0;i<14;i++){
  const marker=mesh(new THREE.BoxGeometry(.2,.045,1.4),centerGlow,0,-3.57,-i*13);
  runway.add(marker);centerMarkers.push(marker);
 }
+// Animated audio-reactive equalizer towers on both sides of the flight path.
+const eqBars=[],eqMaterialA=new THREE.MeshBasicMaterial({color:0x21dfff}),eqMaterialB=new THREE.MeshBasicMaterial({color:0xff39bb});
+const eqGeometry=new THREE.BoxGeometry(.23,1,.22);
+for(let i=0;i<12;i++){
+ const group=new THREE.Group();
+ for(const side of [-1,1]){
+  for(let j=0;j<5;j++){
+   const bar=new THREE.Mesh(eqGeometry,(i+j)%3===0?eqMaterialB:eqMaterialA);
+   bar.position.set(side*(8.2+j*.43),1.4,0);
+   group.add(bar);eqBars.push({bar,i,j,side});
+  }
+ }
+ group.position.z=-i*16;tunnel.add(group);
+ group.userData.eqIndex=i;
+}
+const eqGroups=tunnel.children.filter(g=>g.userData.eqIndex!==undefined);
 const ceilingGlow=new THREE.PointLight(0xd33cff,17,22);ceilingGlow.position.set(0,7,-15);scene.add(ceilingGlow);
 // Premium club ceiling: structural beams, light bars and holographic dance-floor screens.
 const clubDecor=[];
@@ -448,7 +464,9 @@ window.addEventListener('keydown',e=>{if(e.key==='ArrowLeft')setLane(Math.round(
 play.addEventListener('click',()=>{if(contextLost){location.reload();return;}screen.style.display='';startGame();});mute.addEventListener('click',()=>{muted=!muted;mute.textContent=muted?'♪̸':'♫';track.muted=muted;if(trackAvailable)trackLabel(muted?'♪ ТРЕК БЕЗ ЗВУКА':'♫ VITTY ИГРАЕТ');if(master&&audio)master.gain.setTargetAtTime(muted||(trackAvailable&&!track.paused)?0:.55,audio.currentTime,.012);});
 function resize(){camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight);}window.addEventListener('resize',resize);
 document.addEventListener('visibilitychange',()=>{paused=document.hidden;last=0;if(audio){if(paused){track.pause();audio.suspend().catch(()=>{});}else if(running){if(trackAvailable)track.play().catch(()=>{});const activeRun=runId;audio.resume().then(()=>{if(!running||paused||activeRun!==runId)return;const currentStep=Math.max(0,Math.ceil((audio.currentTime-beatZero)/(beat/4)));note=currentStep;nextNote=beatZero+currentStep*(beat/4);}).catch(()=>{});}}});
-function animate(t){requestAnimationFrame(animate);const dt=last?Math.min((t-last)/1000,.04):0;last=t;const active=running&&!paused&&!contextLost;if(active&&dt>0){perfTime+=dt;perfFrames++;perfCooldown=Math.max(0,perfCooldown-dt);if(perfTime>=3){const fps=perfFrames/perfTime;lastKnownFps=Math.round(fps);if(running)statusEl.textContent=(Math.floor(Math.max(0,elapsed)/beat/16)%2===0?'DRIVE':'HYPERDRIVE')+' · 132 BPM · '+lastKnownFps+' FPS';if(perfCooldown===0&&fps<43&&renderScale>0.9){renderScale=Math.max(.9,renderScale-.2);renderer.setPixelRatio(renderScale);perfCooldown=6;}else if(perfCooldown===0&&fps>57&&renderScale<Math.min(devicePixelRatio,1.7)){renderScale=Math.min(Math.min(devicePixelRatio,1.7),renderScale+.1);renderer.setPixelRatio(renderScale);perfCooldown=8;}perfTime=0;perfFrames=0;}}if(active){elapsed+=dt;score+=dt*15;schedule();const speed=33+Math.min(35,elapsed*.45);const rhythmTime=trackAvailable&&!track.paused?track.currentTime:(audio&&beatZero>0&&audio.state==='running'?Math.max(0,audio.currentTime-beatZero):elapsed);while(nextSpawnTime<rhythmTime-1){nextSpawnTime+=beat*2;spawnBeat++;}let spawnedThisFrame=0;while(nextSpawnTime>=rhythmTime-1&&distanceBetween(rhythmTime,nextSpawnTime)<=110+collisionZ&&spawnedThisFrame<24){addObstacle(spawnBeat++,nextSpawnTime);nextSpawnTime+=beat*2;spawnedThisFrame++;}beatPulse=Math.max(0,1-(rhythmTime%beat)/beat);const visualBeat=Math.floor(rhythmTime/beat);if(visualBeat!==lastBeatVisual){lastBeatVisual=visualBeat;statusEl.textContent=(Math.floor(visualBeat/16)%2===0?'DRIVE':'HYPERDRIVE')+' · 132 BPM · '+lastKnownFps+' FPS';}const tunnelDistance=distanceAt(rhythmTime);for(let i=0;i<pulseGates.length;i++){const gate=pulseGates[i];gate.position.z=12-(((i*16-tunnelDistance)%(pulseGates.length*16)+(pulseGates.length*16))%(pulseGates.length*16));gate.scale.x=1+beatPulse*.018;}
+function animate(t){requestAnimationFrame(animate);const dt=last?Math.min((t-last)/1000,.04):0;last=t;const active=running&&!paused&&!contextLost;if(active&&dt>0){perfTime+=dt;perfFrames++;perfCooldown=Math.max(0,perfCooldown-dt);if(perfTime>=3){const fps=perfFrames/perfTime;lastKnownFps=Math.round(fps);if(running)statusEl.textContent=(Math.floor(Math.max(0,elapsed)/beat/16)%2===0?'DRIVE':'HYPERDRIVE')+' · 132 BPM · '+lastKnownFps+' FPS';if(perfCooldown===0&&fps<43&&renderScale>0.9){renderScale=Math.max(.9,renderScale-.2);renderer.setPixelRatio(renderScale);perfCooldown=6;}else if(perfCooldown===0&&fps>57&&renderScale<Math.min(devicePixelRatio,1.7)){renderScale=Math.min(Math.min(devicePixelRatio,1.7),renderScale+.1);renderer.setPixelRatio(renderScale);perfCooldown=8;}perfTime=0;perfFrames=0;}}if(active){elapsed+=dt;score+=dt*15;schedule();const speed=33+Math.min(35,elapsed*.45);const rhythmTime=trackAvailable&&!track.paused?track.currentTime:(audio&&beatZero>0&&audio.state==='running'?Math.max(0,audio.currentTime-beatZero):elapsed);while(nextSpawnTime<rhythmTime-1){nextSpawnTime+=beat*2;spawnBeat++;}let spawnedThisFrame=0;while(nextSpawnTime>=rhythmTime-1&&distanceBetween(rhythmTime,nextSpawnTime)<=110+collisionZ&&spawnedThisFrame<24){addObstacle(spawnBeat++,nextSpawnTime);nextSpawnTime+=beat*2;spawnedThisFrame++;}beatPulse=Math.max(0,1-(rhythmTime%beat)/beat);const visualBeat=Math.floor(rhythmTime/beat);if(visualBeat!==lastBeatVisual){lastBeatVisual=visualBeat;statusEl.textContent=(Math.floor(visualBeat/16)%2===0?'DRIVE':'HYPERDRIVE')+' · 132 BPM · '+lastKnownFps+' FPS';}const tunnelDistance=distanceAt(rhythmTime);for(const g of eqGroups){const i=g.userData.eqIndex;g.position.z=12-(((i*16-tunnelDistance)%(eqGroups.length*16)+(eqGroups.length*16))%(eqGroups.length*16));}
+for(const item of eqBars){const height=.55+(.5+.5*Math.sin(rhythmTime*6+item.j*1.15+item.i*.65))*(1.6+beatPulse*2.5);item.bar.scale.y=height;item.bar.position.y=.15+height*.5;}
+for(let i=0;i<pulseGates.length;i++){const gate=pulseGates[i];gate.position.z=12-(((i*16-tunnelDistance)%(pulseGates.length*16)+(pulseGates.length*16))%(pulseGates.length*16));gate.scale.x=1+beatPulse*.018;}
 for(let i=0;i<centerMarkers.length;i++){centerMarkers[i].position.z=12-(((i*13-tunnelDistance)%(centerMarkers.length*13)+(centerMarkers.length*13))%(centerMarkers.length*13));}
 centerGlow.opacity=.3+beatPulse*.4;gatePink.opacity=.55+beatPulse*.35;gateBlue.opacity=.55+beatPulse*.3;
 for(let i=0;i<runwayChevrons.length;i++){runwayChevrons[i].position.z=12-(((i*13-tunnelDistance)%(runwayChevrons.length*13)+(runwayChevrons.length*13))%(runwayChevrons.length*13));}
