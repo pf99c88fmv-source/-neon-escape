@@ -89,3 +89,13 @@ test('UI remains uncluttered and original VITTY audio stays selected',()=>{
  assert.match(html,/src\/app\.js\?v=cash-hover-1/);
  assert.match(audio,/makar-zhenya-soundtrack\.mp3/);
 });
+
+test('cash rolls hover high above the floor with no pickup or side-pod ring',()=>{
+ const show=code('rave-show.js'),world=code('world.js');
+ assert.match(show,/const g=kind==='cash'\?new T\.Group\(\):pedestal/);
+ assert.match(show,/model\.position\.y=2\.18/);
+ assert.match(show,/if\(kind!=='cash'\)/);
+ assert.match(show,/item\.position\.y=2\.20/);
+ assert.match(world,/else if\(e\.kind==='cash'\)/);
+ assert.match(world,/o\.position\.y=Math\.sin\(beat\*2\*Math\.PI\+e\.id\)\*\.12/);
+});
