@@ -4,7 +4,7 @@ import {RenderPass} from 'three/addons/postprocessing/RenderPass.js';
 import {UnrealBloomPass} from 'three/addons/postprocessing/UnrealBloomPass.js';
 import {OutputPass} from 'three/addons/postprocessing/OutputPass.js';
 import {SPB,SPEED,depth,zones,zoneAt} from './course.js';
-import {TunnelArchitecture} from './tunnel.js';
+import {TunnelArchitecture} from './tunnel.js?v=premium-show-1';
 import {RaveShow} from './rave-show.js';
 import {createCosmicBackdrop} from './cosmic-sky.js';
 import {ShaderPass} from 'three/addons/postprocessing/ShaderPass.js';
