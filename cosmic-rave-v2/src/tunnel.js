@@ -125,7 +125,7 @@ export class TunnelArchitecture{
   // Deep hanging canopy is above the central field of play.
   for(const x of [-2.9,0,2.9]){
    this.add(i,'block','recess',[x,8.63,-5.7],[1.18,.11,4.45]);
-   this.add(i,'block',i%3===0?'amber':'ice',[x,8.52,-5.7],[.58,.038,2.5]);
+   this.add(i,'block','ice',[x,8.52,-5.7],[.58,.038,2.5]);
   }
   // Distinct alternating shapes prevent the repeated corridor look.
   if(type===0){
