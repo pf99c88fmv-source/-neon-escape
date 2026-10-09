@@ -3,7 +3,7 @@ import {EffectComposer} from 'three/addons/postprocessing/EffectComposer.js';
 import {RenderPass} from 'three/addons/postprocessing/RenderPass.js';
 import {UnrealBloomPass} from 'three/addons/postprocessing/UnrealBloomPass.js';
 import {OutputPass} from 'three/addons/postprocessing/OutputPass.js';
-import {SPB,SPEED,depth,zones,zoneAt} from './course.js';
+import {SPB,SPEED,depth,zones,zoneAt,isPickup} from './course.js';
 import {TunnelArchitecture} from './tunnel.js?v=premium-show-1';
 import {RaveShow} from './rave-show.js';
 import {createCosmicBackdrop} from './cosmic-sky.js';
@@ -32,12 +32,28 @@ export class World{
   1/(Math.max(1,innerWidth)*this.dpr),1/(Math.max(1,innerHeight)*this.dpr)
  );
 }
- reset(){for(const o of this.objects.values())this.scene.remove(o);this.objects.clear();for(const p of this.particles)this.scene.remove(p);this.particles=[];}
+ reset(){for(const o of this.objects.values()){this.show.releasePickup(o);this.scene.remove(o);}this.objects.clear();for(const p of this.particles)this.scene.remove(p);this.particles=[];}
  burst(x,hit=false){for(let i=0;i<16;i++){const p=mesh(orb,hit?this.red:this.gold,x,1.3,0,.15,.15,.15);p.userData={life:1,v:new T.Vector3(Math.sin(i*2.4)*3,1+Math.cos(i)*2,Math.cos(i*2.4)*3)};this.scene.add(p);this.particles.push(p);}}
  update(beat,dt,run,active){const z=zoneAt(beat),zone=zones[z];this.neon.color.lerp(new T.Color(zone.color),dt);this.neon.emissive.lerp(new T.Color(zone.color),dt);this.accent.emissive.lerp(new T.Color(zone.accent),dt);const pulse=Math.exp(-(beat%1)*8);this.neon.emissiveIntensity=1.4+pulse*(this.reduced?.2:.7);this.rim.intensity=55+pulse*15;this.backdrop.update(beat,dt);this.portal.rotation.z=Math.sin(beat*.04)*.18;
  const travel=beat*SPB*SPEED;this.tunnel.update(travel,beat,this.reduced);this.show.update(beat,dt,travel);
  this.lasers.forEach((g,i)=>{g.rotation.z=Math.sin(beat*.22+i)*.55;g.rotation.x=Math.cos(beat*.14+i)*.2;});
- for(const e of run?.events||[]){const zz=depth(e.beat,beat);if(zz>8||e.passed){const o=this.objects.get(e.id);if(o){this.scene.remove(o);this.objects.delete(e.id);}continue;}if(zz<-100)continue;let o=this.objects.get(e.id);if(!o){o=new T.Group();const pickup=e.kind==='orb'||e.kind==='shield';if(pickup){o.add(mesh(orb,e.kind==='shield'?this.neon:this.gold,0,1.25,0));o.add(mesh(pickupRing,e.kind==='shield'?this.neon:this.gold,0,1.25,0));}else{const h=e.kind==='laser'?2.2:1.7;o.add(mesh(box,this.dark,0,h/2,0,1.75,h,.6));o.add(mesh(box,this.red,0,h,0,1.85,.12,.7));for(const s of [-1,1])o.add(mesh(box,this.red,s*.86,h/2,0,.1,h,.7));if(e.kind==='shard')o.rotation.z=.12;}this.scene.add(o);this.objects.set(e.id,o);}o.position.set(e.x,0,zz);if(e.kind==='orb'||e.kind==='shield')o.rotation.y=beat*1.8;
+ for(const e of run?.events||[]){const zz=depth(e.beat,beat);if(zz>8||e.passed){const o=this.objects.get(e.id);if(o){this.show.releasePickup(o);this.scene.remove(o);this.objects.delete(e.id);}continue;}if(zz<-100)continue;let o=this.objects.get(e.id);if(!o){o=new T.Group();const pickup=isPickup(e.kind);
+ if(e.kind==='dancer'||e.kind==='bottle'||e.kind==='cash'){
+  const special=this.show.makePickup(e.kind);
+  o.userData.specialModel=special;
+  o.add(special);
+ }else if(pickup){
+  o.add(mesh(orb,e.kind==='shield'?this.neon:this.gold,0,1.25,0));
+  o.add(mesh(pickupRing,e.kind==='shield'?this.neon:this.gold,0,1.25,0));
+ }else{const h=e.kind==='laser'?2.2:1.7;o.add(mesh(box,this.dark,0,h/2,0,1.75,h,.6));o.add(mesh(box,this.red,0,h,0,1.85,.12,.7));for(const s of [-1,1])o.add(mesh(box,this.red,s*.86,h/2,0,.1,h,.7));if(e.kind==='shard')o.rotation.z=.12;}this.scene.add(o);this.objects.set(e.id,o);}o.position.set(e.x,0,zz);if(isPickup(e.kind)){
+  if(e.kind==='dancer'){
+   o.rotation.y=Math.sin(beat*.19+e.id)*.30;
+   o.position.y=Math.sin(beat*Math.PI*2)*.045;
+  }else{
+   o.rotation.y=beat*1.14;
+   o.position.y=Math.sin(beat*2*Math.PI+e.id)*.038;
+  }
+ }
  }
  for(let i=this.particles.length-1;i>=0;i--){const p=this.particles[i];p.userData.life-=dt;p.position.addScaledVector(p.userData.v,dt);p.scale.setScalar(Math.max(0,p.userData.life)*.2);if(p.userData.life<=0){this.scene.remove(p);this.particles.splice(i,1);}}
  const x=run?.x||0;this.camera.position.set(x*.22,3.8,this.distance);this.camera.lookAt(x*.08,2,-15);this.camera.fov=T.MathUtils.damp(this.camera.fov,active&&z===3?67:62,2,dt);this.camera.updateProjectionMatrix();
