@@ -32,12 +32,12 @@ test('each item awards exact reward only one time',()=>{
 
 test('3D lane render and cleanup are wired into the world without changing collider geometry',()=>{
  const show=source('src/rave-show.js'),world=source('src/world.js');
- assert.match(show,/makePickup\\(kind,eventId=0\\)/);
+ assert.match(show,/makePickup\(kind,eventId=0\)/);
  assert.match(show,/activateDancerPickup/);
  assert.match(show,/releasePickup\(group\)/);
  assert.match(show,/SpriteMaterial/);
  assert.match(show,/cloneSkinned/);
- assert.match(world,/this\\.show\\.makePickup\\(e\\.kind,e\\.id\\)/);
+ assert.match(world,/this\.show\.makePickup\(e\.kind,e\.id\)/);
  assert.match(world,/this\.show\.releasePickup\(o\)/);
  assert.match(world,/isPickup\(e\.kind\)/);
  assert.doesNotMatch(show,/run\.score\s*=|run\.health\s*=/);
