@@ -32,6 +32,27 @@ jobs:
           test -s _site/cosmic-rave-v2/assets/audio/vitty-track.json
           test -s _site/makar-zhenya-soundtrack.mp3
           echo "Stable 3D game and audio asset verified."
+      - name: Bundle a first-party copy of the Three.js engine
+        run: |
+          # Avoid third-party CDN failures in Telegram WebViews / mobile networks.
+          # Keep all 3D modules on the same HTTPS origin as the game.
+          npm install --prefix /tmp/cosmic-rave-vendor --no-save --no-package-lock --ignore-scripts --no-audit --no-fund three@0.160.1
+          mkdir -p _site/cosmic-rave-v2/vendor/three/build _site/cosmic-rave-v2/vendor/three/examples
+          cp /tmp/cosmic-rave-vendor/node_modules/three/build/three.module.js _site/cosmic-rave-v2/vendor/three/build/
+          cp -a /tmp/cosmic-rave-vendor/node_modules/three/examples/jsm _site/cosmic-rave-v2/vendor/three/examples/
+          test -s _site/cosmic-rave-v2/vendor/three/build/three.module.js
+          test -s _site/cosmic-rave-v2/vendor/three/examples/jsm/postprocessing/EffectComposer.js
+          test -s _site/cosmic-rave-v2/vendor/three/examples/jsm/loaders/GLTFLoader.js
+          echo "Three.js 0.160.1 is now bundled with the game."
+      - name: Verify browser JavaScript and Mini App routes
+        run: |
+          for file in _site/cosmic-rave-v2/src/*.js; do
+            node --check --input-type=module < "$file"
+          done
+          node --check _site/cosmic-rave-v2/src/bootstrap.js
+          test -s _site/cosmic-rave-v2/assets/models/raver.glb
+          test -s _site/makar-zhenya-soundtrack.mp3
+          grep -q 'vendor/three/build/three.module.js' _site/cosmic-rave-v2/index.html
       - name: Configure Pages
         uses: actions/configure-pages@v5
         with:
