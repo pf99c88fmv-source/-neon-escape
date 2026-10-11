@@ -6,6 +6,8 @@ on:
     paths:
       - '.github/workflows/telegram-miniapp-smoke.yml'
       - 'cosmic-rave-v2/tools/check-miniapp.cjs'
+      - 'cosmic-rave-v2/src/bootstrap.js'
+      - 'cosmic-rave-v2/index.html'
 permissions:
   contents: read
 jobs:
