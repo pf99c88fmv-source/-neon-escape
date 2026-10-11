@@ -49,7 +49,7 @@ window.addEventListener('unhandledrejection',event=>{
 const timeout=setTimeout(()=>{
  if(!moduleLoaded)showError(new Error('Загрузка модулей длится более 20 секунд. Проверь подключение и повтори.'),'TIMEOUT');
 },20000);
-import('./game.bundle.js?v=mobile-reliability-2').then(()=>{
+import('../game.bundle.js?v=mobile-reliability-3').then(()=>{
  moduleLoaded=true;clearTimeout(timeout);
 }).catch(error=>{
  clearTimeout(timeout);
