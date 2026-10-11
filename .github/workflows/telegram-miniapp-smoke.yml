@@ -1,0 +1,22 @@
+name: Test Telegram Mini App in mobile Chromium
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/telegram-miniapp-smoke.yml'
+      - 'cosmic-rave-v2/tools/check-miniapp.cjs'
+permissions:
+  contents: read
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install browser test tools
+        run: npm install --no-save --no-package-lock --no-audit --no-fund playwright@1.62.1
+      - name: Install Chromium
+        run: npx playwright install chromium
+      - name: Check production Mini App without and with Telegram SDK
+        run: node cosmic-rave-v2/tools/check-miniapp.cjs
