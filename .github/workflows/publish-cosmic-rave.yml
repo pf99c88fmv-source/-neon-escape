@@ -4,7 +4,7 @@ on:
     branches: [main]
   workflow_dispatch:
 permissions:
-  contents: read
+  contents: write
   pages: write
   id-token: write
 concurrency:
@@ -32,27 +32,44 @@ jobs:
           test -s _site/cosmic-rave-v2/assets/audio/vitty-track.json
           test -s _site/makar-zhenya-soundtrack.mp3
           echo "Stable 3D game and audio asset verified."
-      - name: Bundle a first-party copy of the Three.js engine
+      - name: Build one self-contained Three.js game script
         run: |
-          # Avoid third-party CDN failures in Telegram WebViews / mobile networks.
-          # Keep all 3D modules on the same HTTPS origin as the game.
-          npm install --prefix /tmp/cosmic-rave-vendor --no-save --no-package-lock --ignore-scripts --no-audit --no-fund three@0.160.1
-          mkdir -p _site/cosmic-rave-v2/vendor/three/build _site/cosmic-rave-v2/vendor/three/examples
-          cp /tmp/cosmic-rave-vendor/node_modules/three/build/three.module.js _site/cosmic-rave-v2/vendor/three/build/
-          cp -a /tmp/cosmic-rave-vendor/node_modules/three/examples/jsm _site/cosmic-rave-v2/vendor/three/examples/
-          test -s _site/cosmic-rave-v2/vendor/three/build/three.module.js
-          test -s _site/cosmic-rave-v2/vendor/three/examples/jsm/postprocessing/EffectComposer.js
-          test -s _site/cosmic-rave-v2/vendor/three/examples/jsm/loaders/GLTFLoader.js
-          echo "Three.js 0.160.1 is now bundled with the game."
-      - name: Verify browser JavaScript and Mini App routes
+          # All game and engine JavaScript is served on our own HTTPS origin.
+          # A single bundle avoids blocked CDNs and dozens of network imports
+          # inside iPhone / Android Telegram WebViews.
+          npm install --prefix /tmp/cosmic-rave-builder --no-save --no-package-lock --no-audit --no-fund three@0.160.1 esbuild@0.25.12
+          ln -s /tmp/cosmic-rave-builder/node_modules node_modules
+          /tmp/cosmic-rave-builder/node_modules/.bin/esbuild cosmic-rave-v2/src/app.js \
+            --bundle --minify --platform=browser --format=esm --target=es2020 \
+            --outfile=cosmic-rave-v2/game.bundle.js
+          node --check cosmic-rave-v2/game.bundle.js
+          test -s cosmic-rave-v2/game.bundle.js
+          test -s cosmic-rave-v2/assets/models/raver.glb
+          test -s makar-zhenya-soundtrack.mp3
+          cp cosmic-rave-v2/game.bundle.js _site/cosmic-rave-v2/game.bundle.js
+          echo "Bundled the game and Three.js for same-origin loading."
+      - name: Store bundled game with source for branch-based Pages
+        run: |
+          # The repository also has GitHub's built-in Pages branch publisher;
+          # it must receive this bundle too, or it can overwrite our deployment.
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add cosmic-rave-v2/game.bundle.js
+          if ! git diff --cached --quiet; then
+            git commit -m "build: include standalone Three.js game for reliable Mini App delivery"
+            git push origin HEAD:main
+          fi
+      - name: Verify production Mini App files
         run: |
           for file in _site/cosmic-rave-v2/src/*.js; do
             node --check --input-type=module < "$file"
           done
           node --check _site/cosmic-rave-v2/src/bootstrap.js
+          node --check _site/cosmic-rave-v2/game.bundle.js
           test -s _site/cosmic-rave-v2/assets/models/raver.glb
           test -s _site/makar-zhenya-soundtrack.mp3
-          grep -q 'vendor/three/build/three.module.js' _site/cosmic-rave-v2/index.html
+          grep -q 'src/bootstrap.js' _site/cosmic-rave-v2/index.html
+          grep -q 'game.bundle.js' _site/cosmic-rave-v2/src/bootstrap.js
       - name: Configure Pages
         uses: actions/configure-pages@v5
         with:
